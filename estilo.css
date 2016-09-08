@@ -9,5 +9,16 @@ and open the template in the editor.
 */
 
 .boxPrincipal{
-    border: 1px solid black;
+   
+}
+
+.form-signin{
+    width: 400px;
+    margin: auto;
+}
+
+@media only screen and (max-width: 500px) {
+    .form-signin{
+        width: auto;
+    }
 }

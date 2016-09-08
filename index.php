@@ -18,7 +18,43 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
         <!-- Inclui todos os plugins compilados (abaixo), ou inclua arquivos separadados se necessário -->
         <script src="framework/bootstrap-3.3.6-dist/js/bootstrap.min.js"></script>
-
+        <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+        <script src="estrutura/core/js/default.js"></script>
+        
+        <script>
+            $(document).ready(function(){
+                $("#btnLogarSistema").click(function(){
+                    var sEmail    = $("#inputEmail").val();
+                    var sPassword = $("#inputPassword").val();
+                    
+                    var sJson = '{"email": "'+sEmail+'","password": "'+sPassword+'"}';
+                    var oJson = JSON.parse(sJson);
+                    
+                    /* 1 - Ato logar */
+                    chamaAjax(1, oJson);
+                });
+      
+                function chamaAjax(iProcesso, oJson){
+                    $.ajax({
+                        url: "include/controller/class_controller_area_trabalho.php",
+                        dataType: 'json',
+                        type: 'post',
+                        data:{
+                            iProcesso : iProcesso,
+                            oJson: oJson
+                        },
+                        success: function(resultado){
+                            alert("deu boa "+resultado);
+                        },
+                        error: function (result) {
+                            alert("deu erro "+result.responseText);
+                        }
+                    });
+                    
+                }
+            });
+        </script>
+        
         <div class="site-wrapper">
 
             <div class="site-wrapper-inner">
@@ -37,6 +73,7 @@
                             </nav>
                         </div>
                     </div>
+                </div>
 
                     <div class="boxPrincipal">
                         <?php 
@@ -47,7 +84,7 @@
                         }
                         ?>
                     </div>
-
+                <div class="cover-container">
                     <div class="mastfoot">
                         <div class="inner">
                             <p>Template desenvolvido por <a href="http://getbootstrap.com">Cleber José Schmidt</a>.</p>
