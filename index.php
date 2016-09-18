@@ -1,3 +1,4 @@
+<?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="pt-br">
     <head>
@@ -8,7 +9,7 @@
         <title>Bootstrap 101 Template</title>
 
         <!-- Bootstrap -->
-        <link href="framework/bootstrap-3.3.6-dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="framework/bootstrap-3.3.6-dist/css/bootstrap.css" rel="stylesheet">
 
         <link href="cover.css" rel="stylesheet">
         <link href="estilo.css" rel="stylesheet">
@@ -43,8 +44,12 @@
                             iProcesso : iProcesso,
                             oJson: oJson
                         },
-                        success: function(resultado){
-                            alert("deu boa "+resultado);
+                        success: function(iResultado){
+                            switch(iResultado){
+                                case 1:
+                                    window.location.href = 'index.php?pagina=sistema';
+                                    break;
+                            }
                         },
                         error: function (result) {
                             alert("deu erro "+result.responseText);
@@ -52,16 +57,35 @@
                     });
                     
                 }
+                
+                $("#btnUsuario").click(function(){                  
+                    var sJson = '{}';
+                    var oJson = JSON.parse(sJson);
+                    
+                    /* 2 - Ação Carregar Usuários */
+                    chamaAjax(2, oJson);
+                });
+                
+                
             });
+            
+            function linhaSelecionada(iCodigo){
+                var oCheckbox = document.getElementById('linha'+iCodigo);
+                if(oCheckbox.checked == true){
+                    oCheckbox.checked = false;
+                }else{
+                    oCheckbox.checked = true;
+                }
+            }
         </script>
         
         <div class="site-wrapper">
 
             <div class="site-wrapper-inner">
 
-                <div class="cover-container">
+                <div class="cover-container paginaInicial">
 
-                    <div class="masthead clearfix">
+                    <div class="masthead clearfix cabalho-sistema">
                         <div class="inner">
                             <h3 class="masthead-brand">Winphor</h3>
                             <nav>
@@ -76,15 +100,15 @@
                 </div>
 
                     <div class="boxPrincipal">
-                        <?php 
+                        <?php
                         if(isset($_GET['pagina'])){
-                            require $_GET['pagina'].'.php';                 
+                            require $_GET['pagina'].'.php';       
                         }else{
                             require 'home.php';
                         }
                         ?>
                     </div>
-                <div class="cover-container">
+                <div class="cover-container paginaInicial">
                     <div class="mastfoot">
                         <div class="inner">
                             <p>Template desenvolvido por <a href="http://getbootstrap.com">Cleber José Schmidt</a>.</p>

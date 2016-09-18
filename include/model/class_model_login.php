@@ -4,20 +4,29 @@ class ModelLogin {
     
     private $email;
     private $password;
+    private $nomeUsuario;
     
-    public function getEmail() {
+    function getEmail() {
         return $this->email;
     }
 
-    public function getPassword() {
+    function getPassword() {
         return $this->password;
     }
 
-    public function setEmail($email) {
+    function getNomeUsuario() {
+        return $this->nomeUsuario;
+    }
+
+    function setEmail($email) {
         $this->email = $email;
     }
 
-    public function setPassword($password) {
+    function setPassword($password) {
         $this->password = $password;
+    }
+
+    function setNomeUsuario($nomeUsuario) {
+        $this->nomeUsuario = $nomeUsuario;
     }
 }

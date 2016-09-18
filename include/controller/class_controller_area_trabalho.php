@@ -6,33 +6,15 @@
  * @package controller
  * @subpackage include
  */
-
 require_once '../../estrutura/core/class_persistencia_teste.php';
 class ControllerAreaTrabalho{
     
-    private $pesquisa;
-    private $tipo;
-    
-    function getPesquisa() {
-        return $this->pesquisa;
-    }
-
-    function getTipo() {
-        return $this->tipo;
-    }
-
-    function setPesquisa($pesquisa) {
-        $this->pesquisa = $pesquisa;
-    }
-
-    function setTipo($tipo) {
-        $this->tipo = $tipo;
+    function __construct() {   
+        $this->processaDados();
     }
 
     public function processaDados(){
         $this->parametrosAjax();
-        //$oPersistencia = $this->selecionaRelacionamento();
-        //$this->pesquisaSuggest($oPersistencia);
     }
     
     private function parametrosAjax(){
@@ -43,34 +25,19 @@ class ControllerAreaTrabalho{
                 case PersistenciaAreaTrabalho::PROCESSO_LOGIN_SISTEMA:
                     $oControllerLogin = new ControllerLogin($aJson);
                     if($oControllerLogin->processaDados()){
-                        echo json_encode(true); 
+                        echo json_encode(1); 
                     }
+                    break;
+                case PersistenciaAreaTrabalho::ACAO_CARREGAR_USUARIO:
+                    $oControllerUsuario = new ControllerUsuario();
+                    $oControllerUsuario->getAllFromModel();
+                    
                     break;
                 //default:
             }
         }
     }
-  
-    private function selecionaRelacionamento(){
-       
-        $oPersistenciaMateria = new PersistenciaMateria();
-        switch ($this->getTipo()){
-            case PersistenciaAreaTrabalho::MATERIA:
-                $oPersistenciaMateria = $oPersistenciaMateria->setRelacionamento();
-                break;
-        }
-        return $oPersistenciaMateria;
-    }
-    
-    private function pesquisaSuggest($oPersistencia){
-        
-        $sugestao = new ControllerSugestao();
-        //print_r(get_declared_classes());
-        $r = $sugestao->buscaSugestao($this->getPesquisa(), $oPersistencia);
-        echo json_encode($r); 
-    }
-    
 }
+$oControllerAreaTrabalho = new ControllerAreaTrabalho();
 
-$executar = new ControllerAreaTrabalho();
-$executar->processaDados();
+                

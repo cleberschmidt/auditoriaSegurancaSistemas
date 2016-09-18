@@ -15,10 +15,13 @@ class ControllerLogin extends ControllerPadrao{
         $oPersistenciaLogin->setRelacionamento();
         
         $oControllerPadraoEstrutura = new ControllerPadraoEstrutura();
-        if($oControllerPadraoEstrutura->buscaDados($this->getModel())){
+        if($aModel = $oControllerPadraoEstrutura->buscaDados($this->getModel())){
+            
+            foreach($aModel as $aDados){
+                $nomeUsuario = $aDados['usu_nome'];
+            }
+            $_SESSION['nomeUsuario'] = $nomeUsuario;
             return true;
         }
     }
-    
-  
 }

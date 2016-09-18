@@ -11,8 +11,13 @@ class Query{
     public function selectAll($sSql){
         $rSql     = $this->query($sSql);
         $aRetorno = Array();
-        while($oLinhaAtual = mysql_fetch_assoc($rSql)){
-            $aRetorno[] = $oLinhaAtual;
+        
+        $aLinhaAtualUtf8 = Array();
+        while($aLinhaAtual = mysql_fetch_assoc($rSql)){
+            foreach ($aLinhaAtual as $sIndice => $xCampo){
+                $aLinhaAtualUtf8[$sIndice] = utf8_encode($xCampo);
+            }
+            $aRetorno[] = $aLinhaAtualUtf8;
         }
         Conexao::desconectar();
         return $aRetorno;  
