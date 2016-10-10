@@ -30,7 +30,7 @@ class ModelUsuario {
     }
 
     function getNivelAcesso() {
-        return $this->nivel;
+        return $this->nivelAcesso;
     }
 
     function setCodigo($codigo) {
@@ -53,7 +53,7 @@ class ModelUsuario {
         $this->nomeUsuario = $nomeUsuario;
     }
 
-    function setNivelAcesso($nivel) {
-        $this->nivel = $nivel;
+    function setNivelAcesso($nivelAcesso) {
+        $this->nivelAcesso = $nivelAcesso;
     }
 }

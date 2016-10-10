@@ -2,11 +2,12 @@
 
 class ControllerUsuario extends ControllerPadrao{
     
-    public function getAllFromModel(){
-        $oPersistenciaUsuario = new PersistenciaUsuario();
-        $oPersistenciaUsuario->setRelacionamento();
-        
-        $oControllerPadraoEstrutura = new ControllerPadraoEstrutura();
-        $aModel = $oControllerPadraoEstrutura->buscaDados();
+    function __construct($aJson = false) {
+        if($aJson){
+            $oModelUsuario = new ModelUsuario();
+            $oModelUsuario->setCodigo($aJson['codigo']);
+
+            $this->setModel($oModelUsuario);
+        }
     }
 }

@@ -1,5 +1,5 @@
 <?php
-
+session_start();
 class ControllerLogin extends ControllerPadrao{
 
     function __construct($aJson) {
@@ -15,10 +15,10 @@ class ControllerLogin extends ControllerPadrao{
         $oPersistenciaLogin->setRelacionamento();
         
         $oControllerPadraoEstrutura = new ControllerPadraoEstrutura();
-        if($aModel = $oControllerPadraoEstrutura->buscaDados($this->getModel())){
+        if($aModel = $oControllerPadraoEstrutura->buscaDados($this->getModel(), PersistenciaAreaTrabalho::TIPO_RETORNO_OBJETO)){
             
-            foreach($aModel as $aDados){
-                $nomeUsuario = $aDados['usu_nome'];
+            foreach($aModel as /* @var $oModel ModelLogin */ $oModel){
+                $nomeUsuario = $oModel->getNomeUsuario();
             }
             $_SESSION['nomeUsuario'] = $nomeUsuario;
             return true;

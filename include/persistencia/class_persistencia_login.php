@@ -7,5 +7,7 @@ class PersistenciaLogin extends PersistenciaPadrao{
         $this->add('usu_email', 'email',    true);
         $this->add('usu_senha', 'password', true);
         $this->add('usu_nome',  'nomeUsuario');
+        
+        $this->addNomeModel('Login');
     }
 }

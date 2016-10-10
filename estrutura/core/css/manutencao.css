@@ -1,0 +1,51 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 08/10/2016, 13:11:24
+    Author     : Cleber
+*/
+
+.input_manutencao{
+    color: black;
+    width: 200px;
+    height: 27px;
+
+}
+
+.select_manutencao{
+    color: black;
+    width: 200px;
+    height: 27px;
+    font-size: 13px;
+}
+
+.tela_manutencao{
+    background: lightgrey;
+    box-shadow: 0px 0px 5px white;
+    padding: 20px;
+}
+
+label{
+    margin-left: -250px;
+    display: inline-block;
+    width:   250px;
+    text-align: right;
+}
+
+.btnManutencao{
+    margin-top: 5px;
+    background: grey;
+    border: 1px solid grey;
+}
+
+.btnManutencao:hover{
+    background: #286090;
+    box-shadow: 0px 0px 5px white;
+}
+
+.input_hide{
+    display: none;
+}
