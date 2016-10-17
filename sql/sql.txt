@@ -1,0 +1,201 @@
+
+CREATE SEQUENCE projeto.tbusuario_usu_codigo_seq;
+
+CREATE TABLE projeto.tbusuario (
+                usu_codigo INTEGER NOT NULL DEFAULT nextval('projeto.tbusuario_usu_codigo_seq'),
+                usu_nome VARCHAR(30) NOT NULL,
+                usu_nivel SMALLINT NOT NULL,
+                usu_senha VARCHAR(32) NOT NULL,
+                usu_email VARCHAR(30) NOT NULL,
+                usu_data_cadastro DATE NOT NULL,
+                CONSTRAINT tbusuario_pk PRIMARY KEY (usu_codigo)
+);
+
+
+ALTER SEQUENCE projeto.tbusuario_usu_codigo_seq OWNED BY projeto.tbusuario.usu_codigo;
+
+CREATE SEQUENCE projeto.tblogpadrao_lpa_codigo_seq;
+
+CREATE TABLE projeto.tblogpadrao (
+                lpa_codigo INTEGER NOT NULL DEFAULT nextval('projeto.tblogpadrao_lpa_codigo_seq'),
+                usu_codigo INTEGER NOT NULL,
+                lpa_nome_tabela VARCHAR(30) NOT NULL,
+                lpa_data TIMESTAMP NOT NULL,
+                lpa_tipo_log SMALLINT NOT NULL,
+                lpa_codigo_tabela INTEGER NOT NULL,
+                CONSTRAINT tblogpadrao_pk PRIMARY KEY (lpa_codigo, usu_codigo)
+);
+COMMENT ON COLUMN projeto.tblogpadrao.lpa_tipo_log IS '1 - Inserção
+2 - Alteração
+3 - Exclusão
+4 - Visualização';
+
+
+ALTER SEQUENCE projeto.tblogpadrao_lpa_codigo_seq OWNED BY projeto.tblogpadrao.lpa_codigo;
+
+CREATE SEQUENCE projeto.tblogusuario_lus_codigo_seq;
+
+CREATE TABLE projeto.tblogusuario (
+                lus_codigo INTEGER NOT NULL DEFAULT nextval('projeto.tblogusuario_lus_codigo_seq'),
+                usu_codigo INTEGER NOT NULL,
+                lus_data TIMESTAMP NOT NULL,
+                lus_login_utilizado VARCHAR(30) NOT NULL,
+                lus_senha_utilizada VARCHAR(30) NOT NULL,
+                lus_historico VARCHAR(30) NOT NULL,
+                CONSTRAINT tblogusuario_pk PRIMARY KEY (lus_codigo, usu_codigo)
+);
+
+
+ALTER SEQUENCE projeto.tblogusuario_lus_codigo_seq OWNED BY projeto.tblogusuario.lus_codigo;
+
+CREATE SEQUENCE projeto.tbproduto_pro_codigo_seq_1;
+
+CREATE TABLE projeto.tbproduto (
+                pro_codigo INTEGER NOT NULL DEFAULT nextval('projeto.tbproduto_pro_codigo_seq_1'),
+                pro_descricao VARCHAR(30) NOT NULL,
+                pro_preco NUMERIC(14,2) NOT NULL,
+                pro_estoque INTEGER NOT NULL,
+                CONSTRAINT tbproduto_pk PRIMARY KEY (pro_codigo)
+);
+
+
+ALTER SEQUENCE projeto.tbproduto_pro_codigo_seq_1 OWNED BY projeto.tbproduto.pro_codigo;
+
+CREATE SEQUENCE projeto.tbestado_est_codigo_seq_1_1;
+
+CREATE TABLE projeto.tbestado (
+                est_codigo INTEGER NOT NULL DEFAULT nextval('projeto.tbestado_est_codigo_seq_1_1'),
+                est_nome VARCHAR(30) NOT NULL,
+                est_sigla VARCHAR(2) NOT NULL,
+                CONSTRAINT tbestado_pk PRIMARY KEY (est_codigo)
+);
+
+
+ALTER SEQUENCE projeto.tbestado_est_codigo_seq_1_1 OWNED BY projeto.tbestado.est_codigo;
+
+CREATE SEQUENCE projeto.tbcidade_cid_codigo_seq;
+
+CREATE TABLE projeto.tbcidade (
+                cid_codigo INTEGER NOT NULL DEFAULT nextval('projeto.tbcidade_cid_codigo_seq'),
+                cid_nome VARCHAR(25) NOT NULL,
+                est_codigo INTEGER NOT NULL,
+                CONSTRAINT tbcidade_pk PRIMARY KEY (cid_codigo)
+);
+
+
+ALTER SEQUENCE projeto.tbcidade_cid_codigo_seq OWNED BY projeto.tbcidade.cid_codigo;
+
+CREATE SEQUENCE projeto.tbcep_cep_codigo_seq_1;
+
+CREATE TABLE projeto.tbcep (
+                cep_codigo INTEGER NOT NULL DEFAULT nextval('projeto.tbcep_cep_codigo_seq_1'),
+                cep_identificador NUMERIC(8) NOT NULL,
+                cid_codigo INTEGER NOT NULL,
+                CONSTRAINT tbcep_pk PRIMARY KEY (cep_codigo)
+);
+
+
+ALTER SEQUENCE projeto.tbcep_cep_codigo_seq_1 OWNED BY projeto.tbcep.cep_codigo;
+
+CREATE SEQUENCE projeto.tbcliente_cli_codigo_seq;
+
+CREATE TABLE projeto.tbcliente (
+                cli_codigo INTEGER NOT NULL DEFAULT nextval('projeto.tbcliente_cli_codigo_seq'),
+                cep_codigo INTEGER NOT NULL,
+                cli_nome VARCHAR(30) NOT NULL,
+                cli_sexo SMALLINT NOT NULL,
+                cli_endereco VARCHAR(30) NOT NULL,
+                cli_data_nascimento DATE NOT NULL,
+                cli_ativo SMALLINT DEFAULT 1 NOT NULL,
+                cli_saldo_devedor NUMERIC(14,2) NOT NULL,
+                CONSTRAINT tbcliente_pk PRIMARY KEY (cli_codigo, cep_codigo)
+);
+
+
+ALTER SEQUENCE projeto.tbcliente_cli_codigo_seq OWNED BY projeto.tbcliente.cli_codigo;
+
+CREATE SEQUENCE projeto.tbvenda_ven_codigo_seq;
+
+CREATE TABLE projeto.tbvenda (
+                ven_codigo INTEGER NOT NULL DEFAULT nextval('projeto.tbvenda_ven_codigo_seq'),
+                ven_data DATE NOT NULL,
+                cli_codigo INTEGER NOT NULL,
+                ven_data_pgto DATE NOT NULL,
+                ven_valor_pgto NUMERIC(14,2) NOT NULL,
+                CONSTRAINT tbvenda_pk PRIMARY KEY (ven_codigo, ven_data, cli_codigo)
+);
+
+
+ALTER SEQUENCE projeto.tbvenda_ven_codigo_seq OWNED BY projeto.tbvenda.ven_codigo;
+
+CREATE SEQUENCE projeto.tbitemvenda_ite_codigo_seq;
+
+CREATE TABLE projeto.tbitemvenda (
+                ite_codigo INTEGER NOT NULL DEFAULT nextval('projeto.tbitemvenda_ite_codigo_seq'),
+                pro_codigo INTEGER NOT NULL,
+                ven_codigo INTEGER NOT NULL,
+                ven_data DATE NOT NULL,
+                cli_codigo INTEGER NOT NULL,
+                ite_quantidade INTEGER NOT NULL,
+                ite_preco NUMERIC(14,2) NOT NULL,
+                CONSTRAINT tbitemvenda_pk PRIMARY KEY (ite_codigo, pro_codigo, ven_codigo, ven_data, cli_codigo)
+);
+
+
+ALTER SEQUENCE projeto.tbitemvenda_ite_codigo_seq OWNED BY projeto.tbitemvenda.ite_codigo;
+
+ALTER TABLE projeto.tblogusuario ADD CONSTRAINT tbusuario_tblogusuario_fk
+FOREIGN KEY (usu_codigo)
+REFERENCES projeto.tbusuario (usu_codigo)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+NOT DEFERRABLE;
+
+ALTER TABLE projeto.tblogpadrao ADD CONSTRAINT tbusuario_tblogpadrao_fk
+FOREIGN KEY (usu_codigo)
+REFERENCES projeto.tbusuario (usu_codigo)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+NOT DEFERRABLE;
+
+ALTER TABLE projeto.tbitemvenda ADD CONSTRAINT tbproduto_tbitemvenda_fk
+FOREIGN KEY (pro_codigo)
+REFERENCES projeto.tbproduto (pro_codigo)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+NOT DEFERRABLE;
+
+ALTER TABLE projeto.tbcidade ADD CONSTRAINT tbestado_tbcidade_fk
+FOREIGN KEY (est_codigo)
+REFERENCES projeto.tbestado (est_codigo)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+NOT DEFERRABLE;
+
+ALTER TABLE projeto.tbcep ADD CONSTRAINT tbcidade_tbcep_fk
+FOREIGN KEY (cid_codigo)
+REFERENCES projeto.tbcidade (cid_codigo)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+NOT DEFERRABLE;
+
+ALTER TABLE projeto.tbcliente ADD CONSTRAINT tbcep_tbcliente_fk
+FOREIGN KEY (cep_codigo)
+REFERENCES projeto.tbcep (cep_codigo)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+NOT DEFERRABLE;
+
+ALTER TABLE projeto.tbvenda ADD CONSTRAINT tbcliente_tbvenda_fk
+FOREIGN KEY (cli_codigo)
+REFERENCES projeto.tbcliente (cli_codigo)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+NOT DEFERRABLE;
+
+ALTER TABLE projeto.tbitemvenda ADD CONSTRAINT tbvenda_tbitemvenda_fk
+FOREIGN KEY (ven_codigo, ven_data, cli_codigo)
+REFERENCES projeto.tbvenda (ven_codigo, ven_data, cli_codigo)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION
+NOT DEFERRABLE;
