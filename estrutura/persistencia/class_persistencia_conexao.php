@@ -5,16 +5,19 @@ class Conexao{
     private static $conexao = null;
     
     const SERVIDOR = '127.0.0.1';
-    const PORTA    = '3306';
+    const PORTA    = '5433';
     const BANCO    = 'projeto_auditoria';
-    const USUARIO  = 'root';
-    const SENHA    = '';
+    const USUARIO  = 'postgres';
+    const SENHA    = 'postgres';
     
     public static function conectar(){
         if(is_null(self::$conexao)){
-            self::$conexao = @mysql_connect(self::SERVIDOR, self::USUARIO, self::SENHA) 
-            or die ("Não foi possível conectar ao servidor MySQL");
-            mysql_select_db(self::BANCO) or die("Não foi possível conectar ao banco de dados MySQL;");
+            self::$conexao = pg_connect("host     =".self::SERVIDOR."
+                                         port     =".self::PORTA." 
+                                         dbname   =".self::BANCO." 
+                                         user     =".self::USUARIO."
+                                         password =".self::SENHA) 
+            or die ("Não foi possível conectar ao servidor PostgreSQL");
         }
         return self::$conexao;
     }
@@ -30,7 +33,8 @@ class Conexao{
     
     public static function desconectar(){
         if(!is_null(self::$conexao)){
-            mysql_close(self::$conexao);
+            pg_close(self::$conexao);
+            self::$conexao = null;
         }
     }
     
@@ -39,8 +43,7 @@ class Conexao{
     }
     
     public function __destruct() {}
-    
-    
+
 }
 
 

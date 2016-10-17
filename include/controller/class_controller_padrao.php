@@ -13,6 +13,12 @@ class ControllerPadrao{
         $this->Model = $Model;
     }
     
+    function __construct($aJson = false) {
+        if($aJson){
+            $this->setModel($this->getControllerPadraoEstrutura()->converteArrayModel($aJson));
+        }
+    }
+    
     /** @return ControllerPadraoEstrutura */
     public function getControllerPadraoEstrutura(){
         if(!isset($this->ControllerPadraoEstrutura)){
@@ -25,7 +31,7 @@ class ControllerPadrao{
         $this->ControllerPadraoEstrutura = $ControllerPadraoEstrutura;
     }
     
-    public function getAllFromModel(){
+    public function getAllFromModel(){ // Utilizado somente no carregamento de dados para consulta
         $oControllerPadraoEstrutura = new ControllerPadraoEstrutura();
         return $oControllerPadraoEstrutura->buscaDados(); 
     }
@@ -34,7 +40,11 @@ class ControllerPadrao{
         return $this->getControllerPadraoEstrutura()->buscaDados($this->getModel());
     }
     
-    public function exclui(){
-        return $this->getControllerPadraoEstrutura()->exclui($this->getModel());
+    public function exclui($aJson){
+        return $this->getControllerPadraoEstrutura()->exclui($aJson);
+    }
+    
+    public function getAllFromModelRelacionamento(){
+        return $this->getControllerPadraoEstrutura()->getAllFromModelRelacionamento();
     }
 }

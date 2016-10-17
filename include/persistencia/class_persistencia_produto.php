@@ -3,11 +3,11 @@
 class PersistenciaProduto extends PersistenciaPadrao{
     
     public function setRelacionamento(){
-        $this->addSchemaTabela('tbproduto');
-        $this->add('pro_codigo',    'codigo', true, true);
-        $this->add('pro_descricao', 'descricao');
-        $this->add('pro_preco',     'preco');
-        $this->add('pro_estoque',   'estoque');
+        $this->addSchemaTabela('projeto.tbproduto');
+        $this->add('pro_codigo',    'codigo',    'Código', true, true);
+        $this->add('pro_descricao', 'descricao', 'Descrição');
+        $this->add('pro_preco',     'preco',     'Valor R$');
+        $this->add('pro_estoque',   'estoque',   'Qtde em Estoque');
         
         $this->addNomeModel('Produto');
     }

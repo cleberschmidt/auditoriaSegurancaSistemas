@@ -49,3 +49,34 @@ label{
 .input_hide{
     display: none;
 }
+
+.codigo, .quantidade{
+    width: 50px;
+    text-align: right;
+}
+
+.preco{
+    width: 80px;
+    text-align: right;
+}
+
+.div_grid_manutencao{
+    margin: auto;
+    width: 700px;
+    border: 1px solid #bdbdbd;
+    border-radius: 3px;
+    background: #ccc;
+}
+
+.div_grid_manutencao .input_manutencao{
+    height: 25px;
+}
+
+.div_grid_manutencao p{
+    margin-top: 5px;
+}
+
+#valorPgto{
+    margin-top: 10px;
+    width: 125px;
+}

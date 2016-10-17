@@ -25,14 +25,20 @@ class ControllerPadraoEstrutura{
         return $oPersistencia->altera($oModel);
     }
     
-    public function exclui($oModel){
+    public function exclui($aJson){
+        $oModel = $this->converteArrayModel($aJson);
         $oPersistencia = new PersistenciaPadraoEstrutura();
         return $oPersistencia->exclui($oModel);
     }
     
+    public function getAllFromModelRelacionamento(){
+        $oPersistencia = new PersistenciaPadraoEstrutura();
+        return $oPersistencia->getAllFromModelRelacionamento();
+    }
+    
     /* Recebe como parametro um único Array
        Retorna o Model especifico do Array, com os valores já setados */
-    private function converteArrayModel($aModel){
+    public function converteArrayModel($aModel){
         $aRelacionamento = PersistenciaPadrao::$aRelacionamento;
         $sSchemaTabela   = PersistenciaPadrao::$sSchemaTabela;
         $sNomeModel      = PersistenciaPadrao::$sNomeModel;
@@ -41,11 +47,34 @@ class ControllerPadraoEstrutura{
         $oModel = new $sModel();
         
         foreach($aModel as $sIndice => $xCampoValor){
-            $sNomeCampo = 'set'.ucfirst($sIndice);
-            $oModel->$sNomeCampo($xCampoValor);
+            if($aModelT = $this->verificaPossuiRelacionamento($sIndice)){
+                $sModelAux = 'Model'.$aModelT[0];
+                $oModelAux = new $sModelAux();
+                
+                
+                $sNomeCampoAux = 'set'.ucfirst($aModelT[1]);
+                $oModelAux->$sNomeCampoAux($xCampoValor); 
+                
+                $sNomeCampo = 'set'.ucfirst($aModelT[0]);
+                $oModel->$sNomeCampo($oModelAux);
+               
+            }else{
+                $sNomeCampo = 'set'.ucfirst($sIndice);
+                $oModel->$sNomeCampo($xCampoValor);
+            }
+            
         }
         
         return $oModel;
+    }
+    
+    /* Função duplicada - existe na PersistenciaPadraoEstrutura */
+    private function verificaPossuiRelacionamento($sPropriedadeModel){
+        
+        if(stripos($sPropriedadeModel, '.')){
+            return explode(".",$sPropriedadeModel);
+        }
+        return false;
     }
 
     /* Recebe um Array */
@@ -61,13 +90,31 @@ class ControllerPadraoEstrutura{
             foreach ($aModel as $indice => $valor){
                 $sNovoIndice = substr($indice, $iTamanhoNomeClasse); // Retira os x primeiros caracteres
                 $sNovoIndice = ltrim($sNovoIndice);
-                $aNewModel[$sNovoIndice] = $valor;
+                
+                if(is_object($valor)){
+                    $sNomeClasseAux = get_class($valor);
+                    $sNome = substr($sNomeClasseAux, 5);
+                    $iTamanhoNomeClasseAux = strlen($sNomeClasseAux);
+                    $iTamanhoNomeClasseAux++;
+                    $aModelAux = (array) $valor;
+                    foreach ($aModelAux as $sIndice => $sValor){
+                        if(!empty($sValor)){
+                            $sNovoIndiceAux = substr($sIndice, $iTamanhoNomeClasseAux); // Retira os x primeiros caracteres
+                            $sNovoIndiceAux = ltrim($sNovoIndiceAux);
+                            $aNewModel[$sNome.'.'.$sNovoIndiceAux] = $sValor;
+                        }
+                    }
+                }else{
+                    $aNewModel[$sNovoIndice] = $valor;
+                }  
             }
             return $aNewModel;
         }
     }
 
-
+    /* recebe vários arrays para model 
+    O array recebido possui como índice as colunas do banco 'Ex: est_codigo' 
+    Caso retorno for do tipo Array -> o índice será a propriedade do model 'Ex: codigo, Estado.codigo' */
     public function getArrayModel($aModel, $tipoRetorno){
         $aNewModel = Array();
          
@@ -82,6 +129,20 @@ class ControllerPadraoEstrutura{
             
             foreach($aCampo as $sIndice => $xCampo){
                 foreach($aRelacionamento as $aCampoRelacionamento){
+                    
+                    if($aModelRelacionamento = $this->verificaPossuiRelacionamento($aCampoRelacionamento['propriedadeModel'])){
+                        $sModelAux = 'Model'.$aModelRelacionamento[0];
+                        $oModelAux = new $sModelAux();
+
+                        $sNomeCampoAux = 'set'.ucfirst($aModelRelacionamento[1]);
+                        $oModelAux->$sNomeCampoAux($xCampo); 
+
+                        $sNomeCampo = 'set'.ucfirst($aModelRelacionamento[0]);
+                        //$oModel->$sNomeCampo($oModelAux);
+                        $xCampo = $oModelAux;
+                        break;
+                    }
+                    
                     if($aCampoRelacionamento['colunaBanco'] == $sIndice){
                         $sNomeCampo = $aCampoRelacionamento['propriedadeModel'];
                         $sNomeCampo = 'set'.ucfirst($sNomeCampo);
@@ -99,5 +160,11 @@ class ControllerPadraoEstrutura{
             $aNewModel[] = $xModel;
         }
         return $aNewModel;
+    }
+    
+    public function insereDadosVenda($aJson){
+        /* Jeito porco :( */
+        $oPersistencia = new PersistenciaPadraoEstrutura();
+        return $oPersistencia->insereVenda($aJson);
     }
 }

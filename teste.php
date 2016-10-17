@@ -11,4 +11,6 @@ $oTeste = new Teste();
 $oTeste->teste2();
 
 $oTeste->$variavel();*/
-echo md5("f");
+echo md5("123");
+
+//echo stripos('cleber', 'r');

@@ -13,9 +13,9 @@ class Query{
         $aRetorno = Array();
         
         $aLinhaAtualUtf8 = Array();
-        while($aLinhaAtual = mysql_fetch_assoc($rSql)){
+        while($aLinhaAtual = pg_fetch_assoc($rSql)){
             foreach ($aLinhaAtual as $sIndice => $xCampo){
-                $aLinhaAtualUtf8[$sIndice] = utf8_encode($xCampo);
+                $aLinhaAtualUtf8[$sIndice] = $xCampo;
             }
             $aRetorno[] = $aLinhaAtualUtf8;
         }
@@ -24,11 +24,11 @@ class Query{
     }
     
     public function query($sSql){
-        $rRetorno = @mysql_query($sSql, $this->conexao);
+        $rRetorno = @pg_query($this->conexao, $sSql);
         if($rRetorno !== false){
             return $rRetorno;
         }
-        echo "<pre>".print_r(mysql_error($this->conexao). $sSql)."</pre>";
+        echo "<pre>".print_r(pg_last_error($this->conexao). $sSql)."</pre>";
         throw new Exception('Erro ao executar comando SQL');
     }
     

@@ -8,9 +8,6 @@ and open the template in the editor.
     Author     : 33873
 */
 
-.boxPrincipal{
-   
-}
 
 .form-signin{
     width: 400px;
@@ -32,8 +29,17 @@ tr{
 }
 
 .table-striped > tbody > tr:nth-of-type(odd):hover{
-    background-color: #1565c0;
+    background-color: #337AB7;
 }
 .table-striped > tbody > tr:nth-of-type(even):hover{
-    background-color: #1565c0;
+    background-color: #337AB7;
+}
+
+#tituloColuna{
+    background: #286090;
+    cursor: default;   
+}
+
+#btnSelecionar{
+    display: none;
 }

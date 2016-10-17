@@ -3,9 +3,9 @@
 class PersistenciaLogin extends PersistenciaPadrao{
     
     public function setRelacionamento(){
-        $this->addSchemaTabela('tbusuario');
-        $this->add('usu_email', 'email',    true);
-        $this->add('usu_senha', 'password', true);
+        $this->addSchemaTabela('projeto.tbusuario');
+        $this->add('usu_email', 'email',    'E-mail',   true);
+        $this->add('usu_senha', 'password', 'Password', true);
         $this->add('usu_nome',  'nomeUsuario');
         
         $this->addNomeModel('Login');

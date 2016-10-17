@@ -31,18 +31,22 @@
                 <ul class="nav nav-sidebar menu_lateral_esquerdo">
                     <li id="btnUsuario"><a href="#">Usuários<span class="sr-only">(current)</span></a></li>
                     <li id="btnProduto"><a href="#">Produtos</a></li>
-                    <li><a href="#">Clientes</a></li>
-                    <li><a href="#">Vendas</a></li>
+                    <li id="btnCliente"><a href="#">Clientes</a></li>
+                    <li id="btnVenda"><a href="#">Vendas</a></li>
+                    <li id="btnEstado"><a href="#">Estado</a></li>
+                    <li id="btnCidade"><a href="#">Cidade</a></li>
+                    <li id="btnCep"><a href="#">Cep</a></li>
                 </ul>
 
             </div>
             <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main" id="container_consulta">
-                <button type="button" class="btn btn-primary" id="btnIncluir">Incluir Usuário</button>
+                <button type="button" class="btn btn-primary" id="btnSelecionar">Selecionar</button>
+                <button type="button" class="btn btn-primary" id="btnIncluir">Incluir</button>
                 <button type="button" class="btn btn-primary" id="btnAlterar">Alterar</button>
                 <button type="button" class="btn btn-primary" id="btnExcluir">Excluir</button>
                 <button type="button" class="btn btn-primary" id="btnVisualizar">Visualizar</button>
 
-                <h2 class="sub-header">Usuários</h2>
+                <h2 class="sub-header titulo_consulta"></h2>
                 <?php
                     if(isset($_GET['acao'])){
                         $iAcao = $_GET['acao'];
