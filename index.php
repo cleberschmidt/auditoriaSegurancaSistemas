@@ -31,6 +31,15 @@
             var gRotina;
             
             $(document).ready(function(){
+                /*var validaPermissaoUsuario = function(){
+                    var sJson = '{}';
+                    var oJson = JSON.parse(sJson);
+                    
+                    /* 9 - validar permissões */
+                    /*chamaAjax(9, oJson);
+                };
+                validaPermissaoUsuario();
+                */
                 $("#btnLogarSistema").click(function(){
                     var sEmail    = $("#inputEmail").val();
                     var sPassword = $("#inputPassword").val();
@@ -65,11 +74,26 @@
                                 case 4:
                                     alert('Acesso bloqueado! \nSomente o administrador pode liberar o seu acesso agora!\nUm e-mail foi enviado para o administrador!');
                                     break;
+                                case 5:
+                                    // não faz nada!
+                                     break;
                                 default:
+                                    
+                                    if(xResultado[0] == 8){
+                                        /* Usuário logado no sistema */
+                                        var aRetorno = xResultado[1];
+                                        for(var propriedade in aRetorno){
+                                            console.log(propriedade);
+                                            console.log(aRetorno[propriedade]);
+                                        }
+                                        
+                                        $("#btnUsuario").removeClass("hide");
+                                        break;
+                                    }
+                                    
                                     /* Retorno do click do botão 'Alterar' */
                                     if(xResultado[0] == 2){
                                         console.log('Retorno do click do botão Alterar!');
-                                        JSON.stringify(xResultado);
 
                                         localStorage['parametroAlterar'] = JSON.stringify(xResultado);
                  
@@ -111,6 +135,8 @@
                                                     gRotinaAtual = 2001;
                                                 }else if(gRotina == 'cep'){
                                                     gRotinaAtual = 2002;
+                                                }else if(gRotina == 'Permissao'){
+                                                    gRotinaAtual = 3000;
                                                 }
 
                                                 // Se for retorno de exclusão entra aqui
@@ -181,7 +207,7 @@
                                             oTd.append(oTh);
                                             oTr.append(oTd);
                                             
-                                            console.log(xResultado[0]);
+                                            console.log("Rotina: "+xResultado[0]);
                                             if(xResultado[0] == 'lupa'){
                                                 $("#btnIncluir").fadeOut(0);
                                                 $("#btnAlterar").fadeOut(0);
@@ -192,9 +218,35 @@
                                             }
                                             
                                             var aNomeColuna = xResultado[1];
-                                            for(var iIndice in aNomeColuna){
-                                                var oTd    = $("<td />").text(aNomeColuna[iIndice]);
-                                                oTr.append(oTd);
+                                            var nomeRotina = xResultado[0];
+                                            if(xResultado[0] != "Permissao"){
+                                                for(var iIndice in aNomeColuna){
+                                                    var oTd    = $("<td />").text(aNomeColuna[iIndice]);
+                                                    oTr.append(oTd);
+                                                }
+                                            }else{
+                                                for(var iIndice in aNomeColuna){
+                                                    var oTd    = $("<td />").text(aNomeColuna[iIndice]);
+                                                    if(aNomeColuna[iIndice] != "Usuário"){
+                                                        var oTable = $("<table />").addClass('table').addClass('table-striped').css("margin-bottom","0px");
+                                                        var oTrT   = $("<tr />");
+                                                        var oTdVisualizacao  = $("<td />").text("Vis");
+                                                        var oTdInclusao  = $("<td />").text("Inc");
+                                                        var oTdAlteracao = $("<td />").text("Alt");
+                                                        var oTdExclusao  = $("<td />").text("Exc");
+                                                        oTrT.append(oTdVisualizacao);
+                                                        oTrT.append(oTdInclusao);
+                                                        oTrT.append(oTdAlteracao);
+                                                        oTrT.append(oTdExclusao);
+                                                        oTable.append(oTrT);
+
+                                                        oTd.append(oTable);
+                                                        oTr.append(oTd);
+                                                    }else{
+                                                        oTr.append(oTd);
+                                                    }
+                                                     
+                                                }
                                             }
                                             
                                             
@@ -203,30 +255,93 @@
                                             tabelaSistemaPai.append(oTabelaSistema);
                                             oTabelaSistema.append(oTr);
 
-                                            for(var iIndice in xResultado){
-                                                if(iIndice > 0){
+                                            if(nomeRotina != "Permissao"){
+                                            
+                                                for(var iIndice in xResultado){
+                                                    if(iIndice > 0){
 
-                                                    var aModel = xResultado[iIndice];
-                                                    var oLinha = document.createElement("tr");
-                                                    oLinha.setAttribute("id", "linhaConsulta");
-                                                    //oLinha.setAttribute("onclick", "linhaSelecionada("+aModel.codigo+")");
-                                                    var oColuna = document.createElement("td");
-                                                    oColuna.setAttribute("id", "checkbox");
-                                                    var oInputCheckbox = document.createElement("input");
-                                                    oInputCheckbox.setAttribute("type", "checkbox");
-                                                    oInputCheckbox.setAttribute("class", "checkbox");
-                                                    //oInputCheckbox.setAttribute("id", "linhaSelecionada");
-
-                                                    oColuna.appendChild(oInputCheckbox);
-                                                    oLinha.appendChild(oColuna);
-                                                    for(var sIndice in aModel){
+                                                        var aModel = xResultado[iIndice];
+                                                        var oLinha = document.createElement("tr");
+                                                        oLinha.setAttribute("id", "linhaConsulta");
+                                                        //oLinha.setAttribute("onclick", "linhaSelecionada("+aModel.codigo+")");
                                                         var oColuna = document.createElement("td");
-                                                        oColuna.setAttribute("id", sIndice);
-                                                        oColuna.textContent = aModel[sIndice];
+                                                        oColuna.setAttribute("id", "checkbox");
+                                                        var oInputCheckbox = document.createElement("input");
+                                                        oInputCheckbox.setAttribute("type", "checkbox");
+                                                        oInputCheckbox.setAttribute("class", "checkbox");
+                                                        //oInputCheckbox.setAttribute("id", "linhaSelecionada");
+
+                                                        oColuna.appendChild(oInputCheckbox);
                                                         oLinha.appendChild(oColuna);
-                                                    }
-                                                    oTabelaSistema.append(oLinha);
-                                                } 
+                                                        for(var sIndice in aModel){
+                                                            var oColuna = document.createElement("td");
+                                                            oColuna.setAttribute("id", sIndice);
+                                                            oColuna.textContent = aModel[sIndice];
+                                                            oLinha.appendChild(oColuna);
+                                                        }
+                                                        oTabelaSistema.append(oLinha);
+                                                    } 
+                                                }
+                                            }else{
+                                            
+                                                for(var iIndice in xResultado){
+                                                    if(iIndice > 0){
+                                                         
+                                                        var aModel = xResultado[iIndice];
+                                                        var oLinha = document.createElement("tr");
+                                                        oLinha.setAttribute("id", "linhaConsulta");
+                                                        //oLinha.setAttribute("onclick", "linhaSelecionada("+aModel.codigo+")");
+                                                        var oColuna = document.createElement("td");
+                                                        oColuna.setAttribute("id", "checkbox");
+                                                        var oInputCheckbox = document.createElement("input");
+                                                        oInputCheckbox.setAttribute("type", "checkbox");
+                                                        oInputCheckbox.setAttribute("class", "checkbox");
+                                                        //oInputCheckbox.setAttribute("id", "linhaSelecionada");
+
+                                                        oColuna.appendChild(oInputCheckbox);
+                                                        oLinha.appendChild(oColuna);
+                                                        for(var sIndice in aModel){
+                                                            if(sIndice != "Usuario.codigo"){
+                                                                var oColuna = document.createElement("td");
+                                                                var oTabela = document.createElement("table");
+                                                                oTabela.setAttribute("class", "table");
+                                                                oTabela.style.background = "transparent";
+                                                                oTabela.style.marginBottom = "0px";
+
+                                                                var oLinhaAux = document.createElement("tr");
+                                                                var oColuna1 = document.createElement("td");
+                                                                var oColuna2 = document.createElement("td");
+                                                                var oColuna3 = document.createElement("td");
+                                                                var oColuna4 = document.createElement("td");
+                                                                //oColuna.setAttribute("id", sIndice);
+                                                                var sModel = aModel[sIndice];
+                                                                oColuna1.textContent = sModel[0] == "1" ? "S" : "N";
+                                                                oColuna2.textContent = sModel[2] == "1" ? "S" : "N";
+                                                                oColuna3.textContent = sModel[4] == "1" ? "S" : "N";
+                                                                oColuna4.textContent = sModel[6] == "1" ? "S" : "N";
+                                                                oLinhaAux.appendChild(oColuna1);
+                                                                oLinhaAux.appendChild(oColuna2);
+                                                                oLinhaAux.appendChild(oColuna3);
+                                                                oLinhaAux.appendChild(oColuna4);
+
+
+                                                                oTabela.appendChild(oLinhaAux);
+                                                                oColuna.appendChild(oTabela);
+                                                                oLinha.appendChild(oColuna);
+                                                            }else{
+                                                                
+                                                                var oColuna = document.createElement("td");
+                                                                oColuna.setAttribute("id", "codigo");
+                                                                oColuna.textContent = aModel[sIndice];
+                                                                oLinha.appendChild(oColuna);
+                                                                
+                                                            }
+                                                            console.log(aModel[sIndice]);
+                                                            
+                                                        }
+                                                        oTabelaSistema.append(oLinha);
+                                                    } 
+                                                }
                                             }
                                             break;
                                         }
@@ -240,7 +355,26 @@
                     
                 }
                 
+                $("#btnPermissao").click(function(){  
+                    $("#btnVisualizar").removeClass("disabled");
+                    $("#btnIncluir").addClass("disabled");
+                    $("#btnAlterar").removeClass("disabled");
+                    $("#btnExcluir").addClass("disabled");
+                    
+                    gRotinaAtual = 3000;
+                    gRotina = 'Permissao';
+                    var sJson = '{"tela_consulta":"Permissao"}';
+                    var oJson = JSON.parse(sJson);
+                     
+                    /* 2 - Ação Carregar Dados da consulta */
+                    chamaAjax(2, oJson);
+                    $(".titulo_consulta").text('Permissões');
+                });
+                
                 $("#btnEstado").click(function(){  
+                    var permissoesAcesso = ('<?php if(isset($_SESSION['tabelaEstado'])){echo $_SESSION['tabelaEstado'];} ?>');
+                    validarPermissoes(permissoesAcesso);
+                    
                     gRotinaAtual = 2000;
                     gRotina = 'Estado';
                     var sJson = '{"tela_consulta":"Estado"}';
@@ -253,6 +387,8 @@
                 });
                 
                 $("#btnCidade").click(function(){  
+                    var permissoesAcesso = ('<?php if(isset($_SESSION['tabelaCidade'])){echo $_SESSION['tabelaCidade'];} ?>');
+                    validarPermissoes(permissoesAcesso);
                     gRotinaAtual = 2001;
                     gRotina = 'Cidade';
                     var sJson = '{"tela_consulta":"Cidade"}';
@@ -265,6 +401,8 @@
                 });
                 
                 $("#btnCep").click(function(){  
+                    var permissoesAcesso = ('<?php if(isset($_SESSION['tabelaCep'])){echo $_SESSION['tabelaCep'];} ?>');
+                    validarPermissoes(permissoesAcesso);
                     gRotinaAtual = 2002;
                     gRotina = 'Cep';
                     var sJson = '{"tela_consulta":"Cep"}';
@@ -277,6 +415,8 @@
                 });
                 
                 $("#btnVenda").click(function(){  
+                    var permissoesAcesso = ('<?php if(isset($_SESSION['tabelaVenda'])){echo $_SESSION['tabelaVenda'];} ?>');
+                    validarPermissoes(permissoesAcesso);
                     gRotinaAtual = 1003;
                     gRotina = 'Venda';
                     var sJson = '{"tela_consulta":"Venda"}';
@@ -289,6 +429,9 @@
                 });
                 
                 $("#btnUsuario").click(function(){  
+                    var permissoesAcesso = ('<?php if(isset($_SESSION['tabelaUsuario'])){echo $_SESSION['tabelaUsuario'];} ?>');
+                    validarPermissoes(permissoesAcesso);
+                    
                     gRotinaAtual = 1000;
                     gRotina = 'Usuario';
                     var sJson = '{"tela_consulta":"Usuario"}';
@@ -300,7 +443,10 @@
                     $(".titulo_consulta").text('Usuários');
                 });
                 
-                $("#btnProduto").click(function(){  
+                $("#btnProduto").click(function(){ 
+                    var permissoesAcesso = ('<?php if(isset($_SESSION['tabelaProduto'])){echo $_SESSION['tabelaProduto'];} ?>');
+                    validarPermissoes(permissoesAcesso);
+                    
                     gRotinaAtual = 1001;
                     gRotina = 'Produto';
                     var sJson = '{"tela_consulta":"Produto"}';
@@ -314,6 +460,9 @@
                 
                 
                 $("#btnCliente").click(function(){  
+                    var permissoesAcesso = ('<?php if(isset($_SESSION['tabelaCliente'])){echo $_SESSION['tabelaCliente'];} ?>');
+                    validarPermissoes(permissoesAcesso);
+                    
                     gRotinaAtual = 1002;
                     gRotina = 'Cliente';
                     var sJson = '{"tela_consulta":"Cliente"}';
@@ -325,42 +474,77 @@
                     $(".titulo_consulta").text('Clientes');
                 });
                 
+                var validarPermissoes = function(sPermissao){
+                    $("#btnVisualizar").removeClass("disabled");
+                    $("#btnIncluir").removeClass("disabled");
+                    $("#btnAlterar").removeClass("disabled");
+                    $("#btnExcluir").removeClass("disabled");
+                    
+                    if(sPermissao[0] == 2){ // Visualização
+                        $("#btnVisualizar").addClass("disabled");
+                    }
+                    if(sPermissao[2] == 2){ // Inserção
+                        $("#btnIncluir").addClass("disabled");
+                    }
+                    if(sPermissao[4] == 2){ // Alteração
+                        $("#btnAlterar").addClass("disabled");
+                    }
+                    if(sPermissao[6] == 2){ // Exclusão
+                        $("#btnExcluir").addClass("disabled");
+                    }
+                };
+                
                 $("#btnExcluir").click(function(){   
-                    
-                    var sJson = '{"tela_consulta":"'+gRotina+'","codigo": "'+gLinhaSelecionada+'"}';
-                    var oJson = JSON.parse(sJson);
-                    
-                    /* 3 - Ação Excluir Usuário */
-                    chamaAjax(3, oJson);
-                });
-                
-                $("#btnIncluir").click(function(){   
-                    localStorage.removeItem('parametroAlterar');
-                    localStorage.removeItem('inclusao');
-                    
-                    var sJson = '{"tela_consulta": "'+gRotina+'"}';
-                    var oJson = JSON.parse(sJson);
-
-                    chamaAjax(6, oJson);
-                });
-                
-                $("#btnVisualizar").click(function(){   
-                    if(gLinhaSelecionada){
-                        gAcao = 105;
-                        var sJson = '{"codigo": "'+gLinhaSelecionada+'","tela_consulta": "'+gRotina+'"}';
+                    if(!$("#btnExcluir").hasClass("disabled")){
+                        var sJson = '{"tela_consulta":"'+gRotina+'","codigo": "'+gLinhaSelecionada+'"}';
                         var oJson = JSON.parse(sJson);
 
-                        chamaAjax(5, oJson);
+                        /* 3 - Ação Excluir Usuário */
+                        chamaAjax(3, oJson);
                     }
                 });
                 
-                $("#btnAlterar").click(function(){   
-                    if(gLinhaSelecionada){
-                        gAcao = 103;
-                        var sJson = '{"codigo": "'+gLinhaSelecionada+'","tela_consulta": "'+gRotina+'"}';
+                $("#btnIncluir").click(function(){   
+                    if(!$("#btnIncluir").hasClass("disabled")){
+                        localStorage.removeItem('parametroAlterar');
+                        localStorage.removeItem('inclusao');
+
+                        var sJson = '{"tela_consulta": "'+gRotina+'"}';
                         var oJson = JSON.parse(sJson);
 
-                        chamaAjax(5, oJson);
+                        chamaAjax(6, oJson);
+                    }
+                });
+                
+                $("#btnVisualizar").click(function(){ 
+                    if(!$("#btnVisualizar").hasClass("disabled")){
+                        if(gLinhaSelecionada){
+                            gAcao = 105;
+                            var sGambi = "codigo";
+                            if(gRotina == "Permissao"){
+                                sGambi = "Usuario.codigo";
+                            }
+                            var sJson = '{"'+sGambi+'": "'+gLinhaSelecionada+'","tela_consulta": "'+gRotina+'"}';
+                            var oJson = JSON.parse(sJson);
+                            
+                            chamaAjax(5, oJson);
+                        }
+                    }
+                });
+                
+                $("#btnAlterar").click(function(){ 
+                    if(!$("#btnAlterar").hasClass("disabled")){
+                        if(gLinhaSelecionada){
+                            gAcao = 103;
+                            var sGambi = "codigo";
+                            if(gRotina == "Permissao"){
+                                sGambi = "Usuario.codigo";
+                            }
+                            var sJson = '{"'+sGambi+'": "'+gLinhaSelecionada+'","tela_consulta": "'+gRotina+'"}';
+                            var oJson = JSON.parse(sJson);
+
+                            chamaAjax(5, oJson);
+                        }
                     }
                 });
                 
@@ -379,7 +563,7 @@
                     var nomeTelaManutencao = telaManutencao.attr("id"); // Pega o id da class
 
                      
-                    if(nomeTelaManutencao != 'tela_manutencao_venda'){
+                    if(nomeTelaManutencao != 'tela_manutencao_venda' && nomeTelaManutencao != 'tela_manutencao_permissao'){
                          
                         var sJson = '{"nomeTelaManutencao":"'+nomeTelaManutencao+'"';
                         $('.tela_manutencao input').each(function(){
@@ -395,6 +579,64 @@
                             
                         });
                         sJson += '}';
+                    }else if(nomeTelaManutencao == 'tela_manutencao_permissao'){
+                        var sJson = '{"nomeTelaManutencao":"'+nomeTelaManutencao+'","Usuario.codigo":"'+$(".nomeUsuario").text()+'"';
+                 
+                        sJson += ',"tabelaUsuario":';
+                        var sChecked = "";
+                        sChecked += $("#linha_usuario .v").is(":checked") ? "1" : "2";
+                        sChecked += $("#linha_usuario .i").is(":checked") ? ",1" : ",2";
+                        sChecked += $("#linha_usuario .a").is(":checked") ? ",1" : ",2";
+                        sChecked += $("#linha_usuario .e").is(":checked") ? ",1" : ",2";
+                        sJson += '"'+sChecked+'"';
+
+                        sJson += ',"tabelaProduto":';
+                        var sChecked = "";
+                        sChecked += $("#linha_produto .v").is(":checked") ? "1" : "2";
+                        sChecked += $("#linha_produto .i").is(":checked") ? ",1" : ",2";
+                        sChecked += $("#linha_produto .a").is(":checked") ? ",1" : ",2";
+                        sChecked += $("#linha_produto .e").is(":checked") ? ",1" : ",2";
+                        sJson += '"'+sChecked+'"';
+
+                        sJson += ',"tabelaCliente":';
+                        var sChecked = "";
+                        sChecked += $("#linha_cliente .v").is(":checked") ? "1" : "2";
+                        sChecked += $("#linha_cliente .i").is(":checked") ? ",1" : ",2";
+                        sChecked += $("#linha_cliente .a").is(":checked") ? ",1" : ",2";
+                        sChecked += $("#linha_cliente .e").is(":checked") ? ",1" : ",2";
+                        sJson += '"'+sChecked+'"';
+
+                        sJson += ',"tabelaVenda":';
+                        var sChecked = "";
+                        sChecked += $("#linha_venda .v").is(":checked") ? "1" : "2";
+                        sChecked += $("#linha_venda .i").is(":checked") ? ",1" : ",2";
+                        sChecked += $("#linha_venda .a").is(":checked") ? ",1" : ",2";
+                        sChecked += $("#linha_venda .e").is(":checked") ? ",1" : ",2";
+                        sJson += '"'+sChecked+'"';
+
+                        sJson += ',"tabelaEstado":';
+                        var sChecked = "";
+                        sChecked += $("#linha_estado .v").is(":checked") ? "1" : "2";
+                        sChecked += $("#linha_estado .i").is(":checked") ? ",1" : ",2";
+                        sChecked += $("#linha_estado .a").is(":checked") ? ",1" : ",2";
+                        sChecked += $("#linha_estado .e").is(":checked") ? ",1" : ",2";
+                        sJson += '"'+sChecked+'"';
+
+                        sJson += ',"tabelaCidade":';
+                        var sChecked = "";
+                        sChecked += $("#linha_cidade .v").is(":checked") ? "1" : "2";
+                        sChecked += $("#linha_cidade .i").is(":checked") ? ",1" : ",2";
+                        sChecked += $("#linha_cidade .a").is(":checked") ? ",1" : ",2";
+                        sChecked += $("#linha_cidade .e").is(":checked") ? ",1" : ",2";
+                        sJson += '"'+sChecked+'"';
+
+                        sJson += ',"tabelaCep":';
+                        var sChecked = "";
+                        sChecked += $("#linha_cep .v").is(":checked") ? "1" : "2";
+                        sChecked += $("#linha_cep .i").is(":checked") ? ",1" : ",2";
+                        sChecked += $("#linha_cep .a").is(":checked") ? ",1" : ",2";
+                        sChecked += $("#linha_cep .e").is(":checked") ? ",1" : ",2";
+                        sJson += '"'+sChecked+'"}';
                     }else{
                         
                         sJson = '{';
@@ -510,9 +752,6 @@
             /* Mais uma linha do Grid - Produtos */
             $(document).on('click', '#btnMais', function(){
             
-                
-                
-            
                 var oGrid      = $(".div_grid_manutencao");
                 var oLinhaGrid = $("<div />").attr('class','div_linha_grid');
 
@@ -534,11 +773,7 @@
 
                 oGrid.append(oLinhaGrid);
             });
-
-            
-            
-            
-            
+           
             function isUndefined(xParametro){
                 return typeof xParametro == 'undefined' ? true : false;
             }

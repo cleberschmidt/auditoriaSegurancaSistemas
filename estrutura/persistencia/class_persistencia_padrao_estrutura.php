@@ -8,6 +8,7 @@ class PersistenciaPadraoEstrutura{
         if(!isset($this->Query)){
             $this->Query = new Query();
         }
+        
         return $this->Query;
     }
     
@@ -26,6 +27,8 @@ class PersistenciaPadraoEstrutura{
     public function getModelAll($oModel){
         $sColunas = '';
         $iContador = 0;
+        $sCondicaoAux = ' where ';
+        $sCondicao = '';
         
         $aRelacionamento = PersistenciaPadrao::$aRelacionamento;
         $sSchemaTabela   = PersistenciaPadrao::$sSchemaTabela;
@@ -34,8 +37,22 @@ class PersistenciaPadraoEstrutura{
         $iTamanhoArray = count($aRelacionamento);
         foreach ($aRelacionamento as $aNewRelacionamento){
             $iContador++;
-            
-            $sColunas .= $aNewRelacionamento['colunaBanco'];
+
+            if($aNewRelacionamento['trazDescricao'] == true){
+                if(ControllerAreaTrabalho::$bCarregaConsulta == true){
+                    if($aNewRelacionamento['colunaBanco'] == 'cid_codigo'){
+                        $sColunas .= 'cid_nome';
+                        $sSchemaTabela .= ', projeto.tbcidade';
+                        $sCondicaoAux .= 'tbcep.cid_codigo = tbcidade.cid_codigo';
+                    }
+                
+                }else{
+                    $sColunas .= $aNewRelacionamento['colunaBanco'];
+                }
+            }else{
+                $sColunas .= $aNewRelacionamento['colunaBanco'];
+            }
+             
             if($iTamanhoArray != $iContador){
                 $sColunas .= ', ';
             }
@@ -61,11 +78,15 @@ class PersistenciaPadraoEstrutura{
         $sSql = 'select '.$sColunas.' from '.$sSchemaTabela; 
         
         if($oModel != false){
-            if(!empty($sCondicao = $this->getCondicao($aRelacionamento, $aNewModel))){
-                $sSql .= ' where '.$sCondicao;
-            }
+            if(!empty($sCondicao = $this->getCondicao($aRelacionamento, $aNewModel))){}
         }
-
+        
+        if(!empty($sCondicao) && $sCondicaoAux != " where "){
+            $sCondicaoAux = ' and '.$sCondicaoAux;
+        }
+        //$sSql .= $sCondicaoAux != " where " ? $sCondicaoAux : "";
+        $sSql .= $sCondicaoAux;
+        $sSql .= $sCondicao;
         $aRetorno = $this->getQuery()->selectAll($sSql);
         
         /* Nome das Colunas - Consulta */
@@ -103,6 +124,14 @@ class PersistenciaPadraoEstrutura{
                     if($sIndice == $aNewRelacionamento['propriedadeModel']){
                         $sCondicao .= '\''.$aNewModel[$sIndice].'\'';
                     } 
+                    
+                    /* tabela permissão gambia loka */
+                    if($aRelacionamento[0]['colunaBanco'] == "per_tabela_usuario"){
+                        /* @var $oModelUsuario ModelUsuario */
+                        $oModelUsuario = $sValor;
+                        $sCondicao = 'usu_codigo = \''.$oModelUsuario->getCodigo().'\'';
+                        break;
+                    }
                 }
             }
         }
@@ -185,6 +214,8 @@ class PersistenciaPadraoEstrutura{
                     if(!empty($xValor)){
                         if($aCampoRelacionamento['propriedadeModel'] == 'codigo'){
                             $sCondicaoCodigo = $aCampoRelacionamento['colunaBanco'].' = '.$xValor;
+                        }else if($this->isPermissao() && $aCampoRelacionamento['propriedadeModel'] == 'Usuario.codigo'){
+                            $sCondicaoCodigo = $aCampoRelacionamento['colunaBanco'].' = '.$xValor;
                         }else{
                             $sNomeCampoBD = $aCampoRelacionamento['colunaBanco'];
                             $aSet[] = $sNomeCampoBD.' = \''.$xValor.'\'';
@@ -196,9 +227,13 @@ class PersistenciaPadraoEstrutura{
         }
             
         $sSet = implode(", ", $aSet);
- 
+        
         $sSql = 'update '.$sSchemaTabela.' set '.$sSet.' where '.$sCondicaoCodigo;
         return $this->getQuery()->query($sSql);
+    }
+    
+    private function isPermissao(){
+        return PersistenciaPadrao::$sSchemaTabela == 'projeto.tbpermissao' ? true : false;
     }
     
     public function insere($oModel){
@@ -228,7 +263,16 @@ class PersistenciaPadraoEstrutura{
         $sValorBd = implode(", ", $aValorBd);
         
         $sSql = 'insert into '.$sSchemaTabela.'('.$sCampoBd.') values('.$sValorBd.')';
-        return $this->getQuery()->query($sSql);
+
+        $retorno = $this->getQuery()->query($sSql);
+        
+        if($sSchemaTabela == 'projeto.tbusuario'){
+            $sSql = "insert into projeto.tbpermissao(usu_codigo, per_tabela_usuario, per_tabela_produto, per_tabela_cliente, per_tabela_venda, per_tabela_cep, per_tabela_cidade, per_tabela_estado) 
+                     values((select max(usu_codigo) from projeto.tbusuario), '2,2,2,2', '2,2,2,2', '2,2,2,2', '2,2,2,2', '2,2,2,2', '2,2,2,2', '2,2,2,2')";
+            $this->Query = new Query();
+            $this->getQuery()->query($sSql); 
+        }
+        return $retorno;
     }
     
     function exclui($oModel){
@@ -353,6 +397,37 @@ class PersistenciaPadraoEstrutura{
             }
         }
         return $aJson;
+    }
+    
+    public function tentativaLogin($sEmailUsuario){
+        $sSql = 'update projeto.tbusuario
+                    set usu_tentativa_login = (select usu_tentativa_login 
+                                                 from projeto.tbusuario 
+                                                where usu_email = \''.$sEmailUsuario.'\') + 1
+                  where usu_email = \''.$sEmailUsuario.'\'';
+        return $this->getQuery()->query($sSql);
+    }
+    
+    public function buscaNumeroTentativaLogin($sEmailUsuario){
+        $sSql = 'select usu_tentativa_login 
+                   from projeto.tbusuario 
+                  where usu_email = \''.$sEmailUsuario.'\'';
+        $aUsuario = $this->getQuery()->selectAll($sSql);
+        if(!empty($aUsuario)){
+            if($aUsuario[0]['usu_tentativa_login'] >= 3){
+                $sSql = 'update projeto.tbusuario
+                            set usu_status = 2
+                          where usu_email = \''.$sEmailUsuario.'\'';
+                $this->Query = new Query();
+                return $this->getQuery()->query($sSql);
+            }
+        }
+        return false;
+    }
+    
+    public function buscaPermissao($iCodigoUsuario){
+        $sSql = 'select * from projeto.tbpermissao where usu_codigo = '.$iCodigoUsuario;
+        return $this->getQuery()->selectAll($sSql);
     }
     
 }

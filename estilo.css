@@ -43,3 +43,7 @@ tr{
 #btnSelecionar{
     display: none;
 }
+
+#tabela_permissao{
+    color: red !important;
+}

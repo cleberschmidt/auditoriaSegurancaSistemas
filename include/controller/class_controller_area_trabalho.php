@@ -14,6 +14,8 @@ class ControllerAreaTrabalho{
     const ROTINA_USUARIO = 1000;
     const ROTINA_PRODUTO = 1001;
     
+    static public $bCarregaConsulta;
+            
     function __construct() {   
         $this->processaDados();
     }
@@ -23,6 +25,7 @@ class ControllerAreaTrabalho{
     }
     
     private function parametrosAjax(){
+        self::$bCarregaConsulta = false;
         if(isset($_POST['iProcesso'])){
             $iProcesso = $_POST['iProcesso'];
             
@@ -33,13 +36,16 @@ class ControllerAreaTrabalho{
             switch($iProcesso){
                 case PersistenciaAreaTrabalho::PROCESSO_LOGIN_SISTEMA:
                     $oControllerLogin = new ControllerLogin($aJson);
-                    if($oControllerLogin->processaDados()){
+                    if($oControllerLogin->processaDados()){  
+                        /* Logado com sucesso */
+                        
                         echo json_encode(self::RECARREGAR_PAGINA_PRINCIPAL); 
                     }else{
                         
-                        $_SESSION['tentativaLogin'] = $_SESSION['tentativaLogin'] + 1;
-                        if($_SESSION['tentativaLogin'] >= 3){
+                        if(!$oControllerLogin->isUsuarioPodeLogar()){
                             /* Enviar e-mail para o administrador */
+                            $this->enviarEmailAdministrador();
+                            
                             echo json_encode(4); 
                         }else{
                             echo json_encode(3); 
@@ -48,7 +54,7 @@ class ControllerAreaTrabalho{
                     }
                     break;
                 case PersistenciaAreaTrabalho::ACAO_CARREGAR_DADOS: // Carrega todos os dados da consulta
-                    $sNomeTelaConsulta = $aJson['tela_consulta'];
+                    $sNomeTelaConsulta = ucfirst($aJson['tela_consulta']);
                     $sPersistencia = 'Persistencia'.ucfirst($sNomeTelaConsulta);
                     $sController = 'Controller'.ucfirst($sNomeTelaConsulta);
                     
@@ -56,6 +62,7 @@ class ControllerAreaTrabalho{
                     $oPersistencia->setRelacionamento();
                     
                     $oController = new $sController();
+                    self::$bCarregaConsulta = true;
                     $aModel = $oController->getAllFromModel();
                     $aModel = $this->addIdentificadorProcesso($aModel, $sNomeTelaConsulta);
                     
@@ -92,41 +99,56 @@ class ControllerAreaTrabalho{
                         echo json_encode(Array(0 => 1, 1 => 2)); 
                         
                         
+                    
+                        
                     }else{
                         $sNomeTelaManutencao = $aJson['nomeTelaManutencao'];
                         array_shift($aJson);
-                    
-                        $iAcao = (int) $aJson['acao'];
-                        array_shift($aJson);
+                        if($sNomeTelaManutencao == 'tela_manutencao_permissao'){
+                            $sNomeClasse = substr($sNomeTelaManutencao, 16); // Retira os 16 primeiros caracteres
+                            $sPersistencia = 'Persistencia'.ucfirst($sNomeClasse);
 
-                        $sNomeClasse = substr($sNomeTelaManutencao, 16); // Retira os 16 primeiros caracteres
-                        $sPersistencia = 'Persistencia'.ucfirst($sNomeClasse);
-
-                        $oPersistencia = new $sPersistencia();
-                        $oPersistencia->setRelacionamento();
-
-                        $oControllerPadraoEstrutura = new ControllerPadraoEstrutura();
-
-                        $aJson = $this->verificaData($aJson);
-
-                        if($iAcao == 103){
+                            $oPersistencia = new $sPersistencia();
+                            $oPersistencia->setRelacionamento();
+                            
+                            $oControllerPadraoEstrutura = new ControllerPadraoEstrutura();
                             if($oControllerPadraoEstrutura->alteraDados($aJson)){
-
                                 echo json_encode(Array(0 => 1, 1 => 2)); 
                             }
+                
                         }else{
+                            // Inclusão normal
 
-                            
-                            /* Default */
-                             if($oControllerPadraoEstrutura->insereDados($aJson)){
 
-                                echo json_encode(Array(0 => 1, 1 => 2)); 
+                            $iAcao = (int) $aJson['acao'];
+                            array_shift($aJson);
+
+                            $sNomeClasse = substr($sNomeTelaManutencao, 16); // Retira os 16 primeiros caracteres
+                            $sPersistencia = 'Persistencia'.ucfirst($sNomeClasse);
+
+                            $oPersistencia = new $sPersistencia();
+                            $oPersistencia->setRelacionamento();
+
+                            $oControllerPadraoEstrutura = new ControllerPadraoEstrutura();
+
+                            $aJson = $this->verificaData($aJson);
+
+                            if($iAcao == 103){
+                                if($oControllerPadraoEstrutura->alteraDados($aJson)){
+
+                                    echo json_encode(Array(0 => 1, 1 => 2)); 
+                                }
+                            }else{
+
+
+                                /* Default */
+                                 if($oControllerPadraoEstrutura->insereDados($aJson)){
+
+                                    echo json_encode(Array(0 => 1, 1 => 2)); 
+                                }
                             }
                         }
                     }
-                    
-                    
-                
                     break;
                 case 5: // Ação alterar //Retorna somente um model
                     $aJson = $_POST['oJson'];
@@ -149,7 +171,10 @@ class ControllerAreaTrabalho{
                     
                     $oController          = new $sController($aJson); // segundo parametro ação de alterar / visualização
                     $aModel               = $oController->getFromModel();
-                    $aModelRelacionamento = $oController->getAllFromModelRelacionamento();
+                    $aModelRelacionamento = Array();
+                    if($sNomeTelaConsulta != "Permissao"){
+                        $aModelRelacionamento = $oController->getAllFromModelRelacionamento();
+                    }
                     $aModel = $this->addIdentificadorProcesso($aModel, 2);
                     
                     array_push($aModel, $aModelRelacionamento);
@@ -167,7 +192,11 @@ class ControllerAreaTrabalho{
                     $oPersistencia->setRelacionamento();
                     
                     $oController = new $sController();
+                    
+                    $aModelRelacionamento = Array();
+                   
                     $aModelRelacionamento = $oController->getAllFromModelRelacionamento();
+                    
                     $aModelRelacionamento = $this->addIdentificadorProcesso($aModelRelacionamento, 4);
                     
                     echo json_encode($aModelRelacionamento); 
@@ -217,6 +246,18 @@ class ControllerAreaTrabalho{
                     $aAux = $this->addIdentificadorProcesso($aAux, $t);
                     echo json_encode($aAux);
                     break;
+                /*case 9: // Validar permissoes
+                    session_start();
+                    $retorno;
+                    if(isset($_SESSION['codigoUsuario'])){
+                        $oControllerPermissao = new ControllerPermissao();
+                        
+                        $retorno = $this->addIdentificadorProcesso($oControllerPermissao->buscaPermissao(), 8);
+                    }else{
+                        $retorno = 5;
+                    }
+                    echo json_encode($retorno);
+                    break;*/
                 //default:
             }
         }
@@ -239,6 +280,14 @@ class ControllerAreaTrabalho{
             }
         }
         return $aJson;
+    }
+    
+    /* Enviar e-mail para o administrador */
+    private function enviarEmailAdministrador(){
+        require '../../estrutura/core/email/EnvioEmail.php';
+        $oControllerEstruturaPadrao = new ControllerPadraoEstrutura();
+        $oControllerEstruturaPadrao->envioEmailAdm();
+        
     }
 }
 $oControllerAreaTrabalho = new ControllerAreaTrabalho();

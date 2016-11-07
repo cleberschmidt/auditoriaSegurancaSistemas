@@ -2,6 +2,12 @@
 
 class ControllerPadraoEstrutura{   
     
+    /** @var PersistenciaPadraoEstrutura */
+    private $Persistencia;
+
+    public function __construct() {
+        $this->Persistencia = new PersistenciaPadraoEstrutura();
+    }
     /* Busca conforme o model setado como parametro 
        Retorna Array de Models 
        $tipoRetorno = 1 Array, 2 Objeto     */
@@ -167,4 +173,32 @@ class ControllerPadraoEstrutura{
         $oPersistencia = new PersistenciaPadraoEstrutura();
         return $oPersistencia->insereVenda($aJson);
     }
+    
+    public function envioEmailAdm(){
+        $oEnvioEmail = new EnvioEmail();
+        $oEnvioEmail->setAssunto('TENTATIVA DE LOGIN');
+        $oEnvioEmail->setMensagem('Usuário '.$_SESSION['textoMensagemNomeUsuario'].' realizou três tentativas de login! Acesso do mesmo bloqueado.'
+                . 'E-mail: '.$_SESSION['textoMensagemEmailUsuario']);
+        $oEnvioEmail->addDestinatario('cleberjoseschmidt@gmail.com');
+        if($oEnvioEmail->enviaEmail()){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    
+    public function tentativaLogin($sEmailUsuario){
+        $oPersistencia = new PersistenciaPadraoEstrutura();
+        return $oPersistencia->tentativaLogin($sEmailUsuario);
+    }
+    
+    public function buscaNumeroTentativaLogin($sEmailUsuario){
+        $oPersistencia = new PersistenciaPadraoEstrutura();
+        return $oPersistencia->buscaNumeroTentativaLogin($sEmailUsuario);
+    }
+    
+    public function buscarPermissao($iCodigoUsuario){
+        return $this->Persistencia->buscaPermissao($iCodigoUsuario);
+    }
+    
 }

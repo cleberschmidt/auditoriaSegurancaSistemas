@@ -12,14 +12,16 @@ class PersistenciaPadrao{
      * caso contrário o campo só será utilizado para seleção de dados (Ex: select coluna_teste ...)
      * $sNomeCampoConsulta - Título da coluna na consulta
      * $bNomeExterno - Tela de Manutenção -> quando tiver select com externo pega o código e como descrição o campo que estiver marcado como true $bNomeExterno
+     * 
      */
-    public function add($sColunaBanco, $sPropriedadeModel, $sNomeCampoConsulta = '', $bChaveCondicao = false, $bChave = false, $bNomeExterno = false){ 
+    public function add($sColunaBanco, $sPropriedadeModel, $sNomeCampoConsulta = '', $bChaveCondicao = false, $bChave = false, $bNomeExterno = false, $bTrazDescricao = false){ 
         self::$aRelacionamento[self::$iContador]['colunaBanco']       = $sColunaBanco;
         self::$aRelacionamento[self::$iContador]['propriedadeModel']  = $sPropriedadeModel;
         self::$aRelacionamento[self::$iContador]['nomeCampoConsulta'] = $sNomeCampoConsulta;
         self::$aRelacionamento[self::$iContador]['chaveCondicao']     = $bChaveCondicao;
         self::$aRelacionamento[self::$iContador]['chave']             = $bChave;
         self::$aRelacionamento[self::$iContador]['nomeExterno']       = $bNomeExterno;
+        self::$aRelacionamento[self::$iContador]['trazDescricao']     = $bTrazDescricao;
         self::$iContador++;
     }
     
