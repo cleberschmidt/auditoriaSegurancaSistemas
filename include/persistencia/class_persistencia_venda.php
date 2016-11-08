@@ -8,7 +8,7 @@ class PersistenciaVenda extends PersistenciaPadrao {
         $this->add('ven_data',       'data',           'Data Venda', false, true);
         $this->add('ven_data_pgto',  'dataPgto',       'Data Pagamento');
         $this->add('ven_valor_pgto', 'valorPgto',      'Valor Pagamento');
-        $this->add('cli_codigo',     'Cliente.codigo', 'Cliente');
+        $this->add('cli_codigo',     'Cliente.codigo', 'Cliente', false, false, false, true);
         
         $this->addNomeModel('Venda');
     }

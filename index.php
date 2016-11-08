@@ -120,20 +120,21 @@
                                                 if($(".tela_manutencao").length){
                                                     $(".tela_manutencao").remove();
                                                 }
+                                                console.log("rotina atual: "+xResultado[0]);
                                                 gRotina = xResultado[0];
-                                                if(gRotina == 'usuario'){
+                                                if(gRotina == 'Usuario'){
                                                     gRotinaAtual = 1000;
-                                                }else if(gRotina == 'produto'){
+                                                }else if(gRotina == 'Produto'){
                                                     gRotinaAtual = 1001;
-                                                }else if(gRotina == 'cliente'){
+                                                }else if(gRotina == 'Cliente'){
                                                     gRotinaAtual = 1002;
-                                                }else if(gRotina == 'venda'){
+                                                }else if(gRotina == 'Venda'){
                                                     gRotinaAtual = 1003;
-                                                }else if(gRotina == 'estado'){
+                                                }else if(gRotina == 'Estado'){
                                                     gRotinaAtual = 2000;
-                                                }else if(gRotina == 'cidade'){
+                                                }else if(gRotina == 'Cidade'){
                                                     gRotinaAtual = 2001;
-                                                }else if(gRotina == 'cep'){
+                                                }else if(gRotina == 'Cep'){
                                                     gRotinaAtual = 2002;
                                                 }else if(gRotina == 'Permissao'){
                                                     gRotinaAtual = 3000;

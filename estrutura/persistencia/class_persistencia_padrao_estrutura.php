@@ -40,11 +40,23 @@ class PersistenciaPadraoEstrutura{
 
             if($aNewRelacionamento['trazDescricao'] == true){
                 if(ControllerAreaTrabalho::$bCarregaConsulta == true){
+                    
+                    // Gambia
                     if($aNewRelacionamento['colunaBanco'] == 'cid_codigo'){
                         $sColunas .= 'cid_nome';
                         $sSchemaTabela .= ', projeto.tbcidade';
                         $sCondicaoAux .= 'tbcep.cid_codigo = tbcidade.cid_codigo';
+                    }else if($aNewRelacionamento['colunaBanco'] == 'est_codigo'){
+                        $sColunas .= 'est_nome';
+                        $sSchemaTabela .= ', projeto.tbestado';
+                        $sCondicaoAux .= 'tbcidade.est_codigo = tbestado.est_codigo';
+                    }else if($aNewRelacionamento['colunaBanco'] == 'cli_codigo'){
+                        $sColunas .= 'cli_nome';
+                        $sSchemaTabela .= ', projeto.tbcliente';
+                        $sCondicaoAux .= 'tbcliente.cli_codigo = tbvenda.cli_codigo';
                     }
+                    
+                    // Fecha Gambia
                 
                 }else{
                     $sColunas .= $aNewRelacionamento['colunaBanco'];
@@ -84,6 +96,10 @@ class PersistenciaPadraoEstrutura{
         if(!empty($sCondicao) && $sCondicaoAux != " where "){
             $sCondicaoAux = ' and '.$sCondicaoAux;
         }
+        
+        if($sCondicaoAux == " where " && empty($sCondicao)){
+            $sCondicaoAux = "";
+        }
         //$sSql .= $sCondicaoAux != " where " ? $sCondicaoAux : "";
         $sSql .= $sCondicaoAux;
         $sSql .= $sCondicao;
@@ -95,6 +111,14 @@ class PersistenciaPadraoEstrutura{
             foreach ($aRetorno as $aModel){
                 foreach($aModel as $sColunaBanco => $sValor){
                     foreach($aRelacionamento as $aNewRelacionamento){
+                        // gambia master
+                        if($sColunaBanco == "cid_nome" && PersistenciaPadrao::$sNomeModel == "Cep"){
+                            $sColunaBanco = "cid_codigo";
+                        }else if($sColunaBanco == "est_nome" && PersistenciaPadrao::$sNomeModel == "Cidade"){
+                            $sColunaBanco = "est_codigo";
+                        }else if($sColunaBanco == "cli_nome" && PersistenciaPadrao::$sNomeModel == "Venda"){
+                            $sColunaBanco = "cli_codigo";
+                        }
                         if($aNewRelacionamento['colunaBanco'] == $sColunaBanco){
                             $aTituloColunaConsulta[$sColunaBanco] = $aNewRelacionamento['nomeCampoConsulta'];
                             break;
