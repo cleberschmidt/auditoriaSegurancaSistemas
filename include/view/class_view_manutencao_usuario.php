@@ -19,6 +19,17 @@
         <option value="2" nomeColuna="nivelAcesso">Normal</option>
     </select>
     <br>
+    <label for="status" >Status: </label>
+    <select class="select_manutencao" nomeColuna="status" >
+        <option value="1" nomeColuna="status">Conta Ativa</option>
+        <option value="2" nomeColuna="status">Conta Desativada</option>
+    </select>
+    <br>
+    <label for="tentativaLogin" >Tentativa Login: </label>
+    <input type="number" id="tentativaLogin" class="input_manutencao" disabled />
+     
+    <br>
     <button type="button" id="btnManutencaoConfirmar" class="btnManutencao">Confirmar</button>
     <button type="button" id="btnManutencaoLimpar"    class="btnManutencao">Limpar</button>
+    <button type="button" id="btnManutencaoZerar" class="btnManutencao">Zerar - Tentativa de Login</button>
 </div>

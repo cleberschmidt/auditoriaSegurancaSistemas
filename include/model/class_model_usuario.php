@@ -8,6 +8,8 @@ class ModelUsuario {
     private $password;
     private $nomeUsuario;
     private $nivelAcesso;
+    private $status;
+    private $tentativaLogin;
     
     function getCodigo() {
         return $this->codigo;
@@ -56,4 +58,22 @@ class ModelUsuario {
     function setNivelAcesso($nivelAcesso) {
         $this->nivelAcesso = $nivelAcesso;
     }
+    
+    function getStatus() {
+        return $this->status;
+    }
+
+    function getTentativaLogin() {
+        return $this->tentativaLogin;
+    }
+
+    function setStatus($status) {
+        $this->status = $status;
+    }
+
+    function setTentativaLogin($tentativaLogin) {
+        $this->tentativaLogin = $tentativaLogin;
+    }
+
+
 }

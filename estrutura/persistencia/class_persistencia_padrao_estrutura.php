@@ -54,6 +54,14 @@ class PersistenciaPadraoEstrutura{
                         $sColunas .= 'cli_nome';
                         $sSchemaTabela .= ', projeto.tbcliente';
                         $sCondicaoAux .= 'tbcliente.cli_codigo = tbvenda.cli_codigo';
+                    }else if($aNewRelacionamento['colunaBanco'] == 'usu_codigo' && PersistenciaPadrao::$sNomeModel == 'Log'){
+                        $sColunas .= 'usu_nome';
+                        $sSchemaTabela .= ', projeto.tbusuario';
+                        $sCondicaoAux .= 'tbusuario.usu_codigo = tblogpadrao.usu_codigo';
+                    }else if($aNewRelacionamento['colunaBanco'] == 'usu_codigo' && PersistenciaPadrao::$sNomeModel == 'LogUsuario'){
+                        $sColunas .= 'usu_nome';
+                        $sSchemaTabela .= ', projeto.tbusuario';
+                        $sCondicaoAux .= 'tbusuario.usu_codigo = tblogusuario.usu_codigo';
                     }
                     
                     // Fecha Gambia
@@ -103,6 +111,13 @@ class PersistenciaPadraoEstrutura{
         //$sSql .= $sCondicaoAux != " where " ? $sCondicaoAux : "";
         $sSql .= $sCondicaoAux;
         $sSql .= $sCondicao;
+        
+        $sOrder = '';
+        if(PersistenciaPadrao::$sNomeModel == 'Log'){
+            $sOrder = ' order by lpa_codigo desc';
+        }
+        $sSql .= $sOrder;
+        
         $aRetorno = $this->getQuery()->selectAll($sSql);
         
         /* Nome das Colunas - Consulta */
@@ -118,6 +133,10 @@ class PersistenciaPadraoEstrutura{
                             $sColunaBanco = "est_codigo";
                         }else if($sColunaBanco == "cli_nome" && PersistenciaPadrao::$sNomeModel == "Venda"){
                             $sColunaBanco = "cli_codigo";
+                        }else if($sColunaBanco == "usu_nome" && PersistenciaPadrao::$sNomeModel == "Log"){
+                            $sColunaBanco = "usu_codigo";
+                        }else if($sColunaBanco == "usu_nome" && PersistenciaPadrao::$sNomeModel == "LogUsuario"){
+                            $sColunaBanco = "usu_codigo";
                         }
                         if($aNewRelacionamento['colunaBanco'] == $sColunaBanco){
                             $aTituloColunaConsulta[$sColunaBanco] = $aNewRelacionamento['nomeCampoConsulta'];
@@ -210,7 +229,7 @@ class PersistenciaPadraoEstrutura{
                     foreach($aModelAuxValor as $sIndiceAux => $xValorAux){
                         $sNovoIndice = substr($sIndiceAux, $iTamanhoNomeClasseAux); // Retira os x primeiros caracteres
                         $sNovoIndice = ltrim($sNovoIndice);
-                        if(!empty($xValorAux)){   
+                        if(!empty($xValorAux) || $xValorAux === 0){   
                             $aModelAux[$sNome.'.'.$sNovoIndice] = $xValorAux;
                         }
                     }
@@ -273,7 +292,7 @@ class PersistenciaPadraoEstrutura{
         foreach($aModel as $sCampo => $xValor){
             foreach($aRelacionamento as $aCampoRelacionamento){
                 if($aCampoRelacionamento['propriedadeModel'] == $sCampo){
-                    if(!empty($xValor)){
+                    if(!empty($xValor) || $xValor === 0){
                         $sNomeCampoBD = $aCampoRelacionamento['colunaBanco'];
                         $aCampoBd[] = $sNomeCampoBD;
                         $aValorBd[] = '\''.$xValor.'\'';
@@ -288,6 +307,9 @@ class PersistenciaPadraoEstrutura{
         
         $sSql = 'insert into '.$sSchemaTabela.'('.$sCampoBd.') values('.$sValorBd.')';
 
+        if($sSchemaTabela == 'projeto.tblogpadrao'){
+            $this->Query = new Query();
+        }
         $retorno = $this->getQuery()->query($sSql);
         
         if($sSchemaTabela == 'projeto.tbusuario'){
@@ -310,6 +332,9 @@ class PersistenciaPadraoEstrutura{
             $sSql .= ' where '.$sCondicao;
         }
 
+        if(PersistenciaPadrao::$sNomeModel == "Venda"){
+            $sSql = "delete from projeto.tbitemvenda where ven_codigo = ".$oModel->getCodigo()."; ".$sSql.";";
+        }
         return $this->getQuery()->query($sSql);
     }
     
@@ -451,6 +476,18 @@ class PersistenciaPadraoEstrutura{
     
     public function buscaPermissao($iCodigoUsuario){
         $sSql = 'select * from projeto.tbpermissao where usu_codigo = '.$iCodigoUsuario;
+        return $this->getQuery()->selectAll($sSql);
+    }
+    
+    public function zerarTentativaLogin($iCodigoUsuario){
+        $sSql = 'UPDATE projeto.tbusuario set usu_tentativa_login = 0 where usu_codigo = '.$iCodigoUsuario;
+        $this->getQuery()->query($sSql); 
+    }
+    
+    public function buscaUltimoRegistro(){
+        $sSchemaTabela   = PersistenciaPadrao::$sSchemaTabela;
+        $sSql = 'SELECT * FROM '.$sSchemaTabela.' ORDER BY 1 DESC limit 1';
+        $this->Query = new Query();
         return $this->getQuery()->selectAll($sSql);
     }
     

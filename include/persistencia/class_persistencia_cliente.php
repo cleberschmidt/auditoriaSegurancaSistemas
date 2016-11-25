@@ -10,7 +10,7 @@ class PersistenciaCliente extends PersistenciaPadrao{
         $this->add('cli_endereco',        'endereco',       'Endereço');
         $this->add('cli_data_nascimento', 'dataNascimento', 'Data de Nascimento');
         $this->add('cli_ativo',           'ativo',          'Status');
-        $this->add('cli_saldo_devedor',   'saldoDevedor',   'Saldo Devedor');
+        $this->add('cli_saldo_devedor',   'saldoDevedor',   'Saldo');
         $this->add('cep_codigo',          'Cep.codigo',     'CEP');
         
         $this->addNomeModel('Cliente');

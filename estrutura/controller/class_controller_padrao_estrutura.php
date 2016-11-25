@@ -11,28 +11,251 @@ class ControllerPadraoEstrutura{
     /* Busca conforme o model setado como parametro 
        Retorna Array de Models 
        $tipoRetorno = 1 Array, 2 Objeto     */
-    public function buscaDados($oModel = false, $tipoRetorno = PersistenciaAreaTrabalho::TIPO_RETORNO_ARRAY){    
+    public function buscaDados($oModel = false, $tipoRetorno = PersistenciaAreaTrabalho::TIPO_RETORNO_ARRAY){
         $oPersistencia = new PersistenciaPadraoEstrutura();
         
         $aModel = $oPersistencia->getModelAll($oModel);
-        return $this->getArrayModel($aModel, $tipoRetorno);
+        
+        if(PersistenciaPadrao::$sNomeModel == "Log"){ // Só serve para colocar um nome em vez de numero na consulta do log
+            $aModel = $this->verificaNomeAcaoLog($aModel);
+        }
+        
+        if($aRetorno = $this->getArrayModel($aModel, $tipoRetorno)){
+            if(ControllerAreaTrabalho::$sAcao == "visualizar" && PersistenciaPadrao::$sNomeModel != "Log" && PersistenciaPadrao::$sNomeModel != "Permissao"){
+                $aAuxTeste = $this->renomeiaPropriedade($aRetorno);
+                
+                $aAux = PersistenciaPadrao::$sNomeModel;
+                
+                PersistenciaPadrao::$aRelacionamento = null;
+                $sAuxTabela = PersistenciaPadrao::$sSchemaTabela;
+                $sAuxTabela = substr($sAuxTabela, 8); // Retira os x primeiros caracteres
+                
+                PersistenciaPadrao::$sSchemaTabela = null;
+                
+                $oPersistenciaLog = new PersistenciaLog();
+                $oPersistenciaLog->setRelacionamento();
+                
+                session_start();
+                date_default_timezone_set('America/Sao_Paulo');
+                $sData = date('Y-m-d H:i');
+                
+                $oModelLogPadrao = new ModelLog();
+                $oModelLogPadrao->setAcao(4); // Visualizar
+                $oModelLogPadrao->setData($sData);
+                $oModelLogPadrao->setNomeTabela($sAuxTabela);
+                $oModelLogPadrao->getUsuario()->setCodigo($_SESSION['codigoUsuario']);
+                
+                $sString = implode(', ', $aAuxTeste);
+                
+                $oModelLogPadrao->setLog($sString);
+                
+                $oPersistencia->insere($oModelLogPadrao);
+                
+                PersistenciaPadrao::$aRelacionamento = null;
+                PersistenciaPadrao::$sSchemaTabela = null;
+                
+                $sPersistencia = 'Persistencia'.$aAux;
+                $oPersistencia = new $sPersistencia();
+                $oPersistencia->setRelacionamento();
+            }else if(ControllerAreaTrabalho::$sAcao == "excluir" && PersistenciaPadrao::$sNomeModel != "Log"){
+                $aAuxTeste = $this->renomeiaPropriedade($aRetorno);
+                
+                $aAux = PersistenciaPadrao::$sNomeModel;
+                
+                PersistenciaPadrao::$aRelacionamento = null;
+                $sAuxTabela = PersistenciaPadrao::$sSchemaTabela;
+                $sAuxTabela = substr($sAuxTabela, 8); // Retira os x primeiros caracteres
+                
+                PersistenciaPadrao::$sSchemaTabela = null;
+                
+                $oPersistenciaLog = new PersistenciaLog();
+                $oPersistenciaLog->setRelacionamento();
+                
+                session_start();
+                date_default_timezone_set('America/Sao_Paulo');
+                $sData = date('Y-m-d H:i');
+                
+                $oModelLogPadrao = new ModelLog();
+                $oModelLogPadrao->setAcao(3); // Excluir
+                $oModelLogPadrao->setData($sData);
+                $oModelLogPadrao->setNomeTabela($sAuxTabela);
+                $oModelLogPadrao->getUsuario()->setCodigo($_SESSION['codigoUsuario']);
+                
+                $sString = implode(', ', $aAuxTeste);
+                
+                $oModelLogPadrao->setLog($sString);
+                
+                $oPersistencia->insere($oModelLogPadrao);
+                
+                PersistenciaPadrao::$aRelacionamento = null;
+                PersistenciaPadrao::$sSchemaTabela = null;
+                
+                $sPersistencia = 'Persistencia'.$aAux;
+                $oPersistencia = new $sPersistencia();
+                $oPersistencia->setRelacionamento();
+            }else if(ControllerAreaTrabalho::$sAcao == "alterar" && PersistenciaPadrao::$sNomeModel != "Log"){
+                $t = $this->toArray($oModel);
+                
+                $sAntes = $this->renomeiaPropriedade(Array($t));
+                $sAntesT = implode(', ',$sAntes);
+                
+                $aAuxTeste = $this->renomeiaPropriedade($aRetorno);
+                $sString = implode(', ', $aAuxTeste);
+                
+                $aAux = PersistenciaPadrao::$sNomeModel;
+                
+                PersistenciaPadrao::$aRelacionamento = null;
+                $sAuxTabela = PersistenciaPadrao::$sSchemaTabela;
+                $sAuxTabela = substr($sAuxTabela, 8); // Retira os x primeiros caracteres
+                
+                PersistenciaPadrao::$sSchemaTabela = null;
+                
+                $oPersistenciaLog = new PersistenciaLog();
+                $oPersistenciaLog->setRelacionamento();
+                
+                session_start();
+                date_default_timezone_set('America/Sao_Paulo');
+                $sData = date('Y-m-d H:i');
+                
+                $oModelLogPadrao = new ModelLog();
+                $oModelLogPadrao->setAcao(2); // Alterar
+                $oModelLogPadrao->setData($sData);
+                $oModelLogPadrao->setNomeTabela($sAuxTabela);
+                $oModelLogPadrao->getUsuario()->setCodigo($_SESSION['codigoUsuario']);
+                
+                
+                
+                $junt = 'Anterior = '.$sString.' / Atual = '.$sAntesT;
+                
+                $oModelLogPadrao->setLog($junt);
+                
+                $oPersistencia->insere($oModelLogPadrao);
+                
+                PersistenciaPadrao::$aRelacionamento = null;
+                PersistenciaPadrao::$sSchemaTabela = null;
+                
+                $sPersistencia = 'Persistencia'.$aAux;
+                $oPersistencia = new $sPersistencia();
+                $oPersistencia->setRelacionamento();
+            }
+            return $aRetorno;
+        }
     } 
     
+    private function renomeiaPropriedade($aModel, $iTipo = 1){
+   
+        $aAux = Array();
+        if($iTipo == 1){
+            foreach($aModel[0] as $sPropriedade => $sValor){
+                foreach(PersistenciaPadrao::$aRelacionamento as $aRelacionamento){
+                    if($aRelacionamento['propriedadeModel'] == $sPropriedade){
+                        $aAux[] = $aRelacionamento['nomeCampoConsulta']." : ".$sValor;
+                        break;
+                    }
+                }
+            }
+        }else if($iTipo == 2){
+            foreach($aModel[0] as $sPropriedade => $sValor){
+                foreach(PersistenciaPadrao::$aRelacionamento as $aRelacionamento){
+                    if($aRelacionamento['colunaBanco'] == $sPropriedade){
+                        $aAux[] = $aRelacionamento['nomeCampoConsulta']." : ".$sValor;
+                        break;
+                    }
+                }
+            }
+        }
+        return $aAux;
+    }
+    
+    private function verificaNomeAcaoLog($aModel){
+        
+        $aNew = Array();
+        foreach($aModel as $aModelAux){
+            foreach ($aModelAux as $valor) {
+                switch ($aModelAux['lpa_tipo_log']) {
+                    case 1:
+                        $aModelAux['lpa_tipo_log'] = 'Inserção';
+                        break;
+                    case 2:
+                        $aModelAux['lpa_tipo_log'] = 'Alteração';
+                        break;
+                    case 3:
+                        $aModelAux['lpa_tipo_log'] = 'Exclusão';
+                        break;
+                    case 4:
+                        $aModelAux['lpa_tipo_log'] = 'Visualização';
+                        break;
+                }
+                $aNew[] = $aModelAux;
+                break;
+            }
+        }
+        return $aNew;
+    }
+
+
     /* Inserção padrão */
     public function insereDados($aJson){
         $oModel = $this->converteArrayModel($aJson);
         $oPersistencia = new PersistenciaPadraoEstrutura();
-        return $oPersistencia->insere($oModel);
+        if($oPersistencia->insere($oModel)){
+            $aModel = $oPersistencia->buscaUltimoRegistro();
+
+            if(ControllerAreaTrabalho::$sAcao == "inserir" && PersistenciaPadrao::$sNomeModel != "Log"){
+                $aAuxTeste = $this->renomeiaPropriedade($aModel, 2);
+                
+                $aAux = PersistenciaPadrao::$sNomeModel;
+                
+                PersistenciaPadrao::$aRelacionamento = null;
+                $sAuxTabela = PersistenciaPadrao::$sSchemaTabela;
+                $sAuxTabela = substr($sAuxTabela, 8); // Retira os x primeiros caracteres
+                
+                PersistenciaPadrao::$sSchemaTabela = null;
+                
+                $oPersistenciaLog = new PersistenciaLog();
+                $oPersistenciaLog->setRelacionamento();
+                
+                session_start();
+                date_default_timezone_set('America/Sao_Paulo');
+                $sData = date('Y-m-d H:i');
+                
+                $oModelLogPadrao = new ModelLog();
+                $oModelLogPadrao->setAcao(1); // Excluir
+                $oModelLogPadrao->setData($sData);
+                $oModelLogPadrao->setNomeTabela($sAuxTabela);
+                $oModelLogPadrao->getUsuario()->setCodigo($_SESSION['codigoUsuario']);
+                
+                $sString = implode(', ', $aAuxTeste);
+                
+                $oModelLogPadrao->setLog($sString);
+                
+                $oPersistencia->insere($oModelLogPadrao);
+                
+                PersistenciaPadrao::$aRelacionamento = null;
+                PersistenciaPadrao::$sSchemaTabela = null;
+                
+                $sPersistencia = 'Persistencia'.$aAux;
+                $oPersistencia = new $sPersistencia();
+                $oPersistencia->setRelacionamento();
+            }
+            
+        }
+        return true;
     }
     
     public function alteraDados($aJson){
         $oModel = $this->converteArrayModel($aJson);
+        $this->buscaDados($oModel); //Somente para criar log
         $oPersistencia = new PersistenciaPadraoEstrutura();
-        return $oPersistencia->altera($oModel);
+        if($oPersistencia->altera($oModel)){
+            
+            return true;
+        }
     }
     
     public function exclui($aJson){
         $oModel = $this->converteArrayModel($aJson);
+        $this->buscaDados($oModel); //Somente para criar log
         $oPersistencia = new PersistenciaPadraoEstrutura();
         return $oPersistencia->exclui($oModel);
     }
@@ -199,6 +422,14 @@ class ControllerPadraoEstrutura{
     
     public function buscarPermissao($iCodigoUsuario){
         return $this->Persistencia->buscaPermissao($iCodigoUsuario);
+    }
+    
+    public function zerarTentativaLogin($iCodigoUsuario){
+        $this->Persistencia->zerarTentativaLogin($iCodigoUsuario);
+    }
+    
+    public function insere($oModel){
+        return $this->Persistencia->insere($oModel);
     }
     
 }

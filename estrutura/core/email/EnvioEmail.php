@@ -5,8 +5,8 @@ class EnvioEmail{
     
     private $servidor = 'smtp-mail.outlook.com';
     private $porta    = 587;
-    private $conta    = 'cleber_blacks7@hotmail.com';
-    private $senha    = 'rozelito';
+    private $conta    = '';
+    private $senha    = '';
     
     private $PHPMailer;
     

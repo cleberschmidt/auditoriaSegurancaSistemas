@@ -2,10 +2,12 @@
 session_start();
 class ControllerLogin extends ControllerPadrao{
 
+    static $senhaUtilizada;
+    
     function __construct($aJson) {
         $oModelLogin = new ModelLogin();
         $oModelLogin->setEmail($aJson['email']);
-        $oModelLogin->setPassword(md5($aJson['password']));
+        $oModelLogin->setPassword($aJson['password']);
 
         $this->setModel($oModelLogin);
     }
@@ -15,6 +17,9 @@ class ControllerLogin extends ControllerPadrao{
         $oPersistenciaLogin->setRelacionamento();
         
         $oControllerPadraoEstrutura = new ControllerPadraoEstrutura();
+        
+        self::$senhaUtilizada = $this->getModel()->getPassword();
+        $this->getModel()->setPassword(md5($this->getModel()->getPassword()));
         if($aModel = $oControllerPadraoEstrutura->buscaDados($this->getModel(), PersistenciaAreaTrabalho::TIPO_RETORNO_OBJETO)){
             
                 foreach($aModel as /* @var $oModel ModelLogin */ $oModel){
@@ -41,6 +46,31 @@ class ControllerLogin extends ControllerPadrao{
                     $_SESSION['tabelaCidade']  = $aPermissao[0]['per_tabela_cidade'];
                     $_SESSION['tabelaCep']     = $aPermissao[0]['per_tabela_cep'];
                     
+                    /* Usuário Logou */
+                    date_default_timezone_set('America/Sao_Paulo');
+                    $sData = date('Y-m-d H:i');
+                
+                    $oModelLogUsuario = new ModelLogUsuario();
+                    $oModelLogUsuario->setData($sData);
+                    $oModelLogUsuario->setLoginUtilizado($this->getModel()->getEmail());
+                    $oModelLogUsuario->setSenhaUtilizada(self::$senhaUtilizada);
+                    $oModelLogUsuario->setHistorico('Usuário logado com sucesso!');
+                    $oModelLogUsuario->getUsuario()->setCodigo($codigoUsuario);
+                    
+                    PersistenciaPadrao::$aRelacionamento = null;
+                    PersistenciaPadrao::$sSchemaTabela   = null;
+                    
+                    $oPersistenciaLogUsuario = new PersistenciaLogUsuario();
+                    $oPersistenciaLogUsuario->setRelacionamento();
+                    
+                    $oControllerPadraoEstrutura->insere($oModelLogUsuario);
+                    
+                    PersistenciaPadrao::$aRelacionamento = null;
+                    PersistenciaPadrao::$sSchemaTabela   = null;
+                    
+                    $oPersistenciaLogin = new PersistenciaLogin();
+                    $oPersistenciaLogin->setRelacionamento();
+                    
                     return true;
                 }else{
                     $_SESSION['textoMensagemNomeUsuario']  = $nomeUsuario;
@@ -64,8 +94,58 @@ class ControllerLogin extends ControllerPadrao{
     public function isUsuarioPodeLogar(){
         $oControllerPadraoEstrutura = new ControllerPadraoEstrutura();
         if($oControllerPadraoEstrutura->buscaNumeroTentativaLogin($this->getModel()->getEmail())){
-                return false;
+            
+            date_default_timezone_set('America/Sao_Paulo');
+            $sData = date('Y-m-d H:i');
+
+            $oModelLogUsuario = new ModelLogUsuario();
+            $oModelLogUsuario->setData($sData);
+            $oModelLogUsuario->setLoginUtilizado($this->getModel()->getEmail());
+            $oModelLogUsuario->setSenhaUtilizada(self::$senhaUtilizada);
+            $oModelLogUsuario->setHistorico('Falha no Login, e-mail ou senha errado! E-mail enviado para o adm!');
+            $oModelLogUsuario->getUsuario()->setCodigo(0);
+            
+            PersistenciaPadrao::$aRelacionamento = null;
+            PersistenciaPadrao::$sSchemaTabela   = null;
+
+            $oPersistenciaLogUsuario = new PersistenciaLogUsuario();
+            $oPersistenciaLogUsuario->setRelacionamento();
+
+            $oControllerPadraoEstrutura->insere($oModelLogUsuario);
+
+            PersistenciaPadrao::$aRelacionamento = null;
+            PersistenciaPadrao::$sSchemaTabela   = null;
+
+            $oPersistenciaLogin = new PersistenciaLogin();
+            $oPersistenciaLogin->setRelacionamento();
+                    
+            return false;
         }
+        
+        date_default_timezone_set('America/Sao_Paulo');
+        $sData = date('Y-m-d H:i');
+
+        $oModelLogUsuario = new ModelLogUsuario();
+        $oModelLogUsuario->setData($sData);
+        $oModelLogUsuario->setLoginUtilizado($this->getModel()->getEmail());
+        $oModelLogUsuario->setSenhaUtilizada(self::$senhaUtilizada);
+        $oModelLogUsuario->setHistorico('Falha no Login, e-mail ou senha errado!');
+        $oModelLogUsuario->getUsuario()->setCodigo(0);
+        
+        PersistenciaPadrao::$aRelacionamento = null;
+        PersistenciaPadrao::$sSchemaTabela   = null;
+
+        $oPersistenciaLogUsuario = new PersistenciaLogUsuario();
+        $oPersistenciaLogUsuario->setRelacionamento();
+
+        $oControllerPadraoEstrutura->insere($oModelLogUsuario);
+
+        PersistenciaPadrao::$aRelacionamento = null;
+        PersistenciaPadrao::$sSchemaTabela   = null;
+
+        $oPersistenciaLogin = new PersistenciaLogin();
+        $oPersistenciaLogin->setRelacionamento();
+            
         return true;
     }
 }

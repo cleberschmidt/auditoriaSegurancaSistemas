@@ -40,6 +40,24 @@
                 };
                 validaPermissaoUsuario();
                 */
+               if(localStorage['recarregarPagina'] == '1'){
+                    localStorage.removeItem('recarregarPagina');
+                   
+                    $("#btnVisualizar").removeClass("disabled");
+                    $("#btnIncluir").addClass("disabled");
+                    $("#btnAlterar").removeClass("disabled");
+                    $("#btnExcluir").addClass("disabled");
+
+                    gRotinaAtual = 3000;
+                    gRotina = 'Permissao';
+                    var sJson = '{"tela_consulta":"Permissao"}';
+                    var oJson = JSON.parse(sJson);
+
+                    /* 2 - Ação Carregar Dados da consulta */
+                    chamaAjax(2, oJson);
+                    $(".titulo_consulta").text('Permissões');
+               }
+               
                 $("#btnLogarSistema").click(function(){
                     var sEmail    = $("#inputEmail").val();
                     var sPassword = $("#inputPassword").val();
@@ -78,6 +96,19 @@
                                     // não faz nada!
                                      break;
                                 default:
+                                    if(xResultado[0] == 5){ // retorno de click em selecionar
+                                        
+                                        xResultado.splice(0, 1); 
+                                        var oJson = xResultado;
+
+                                        var sJson = JSON.stringify(oJson);
+                                        localStorage['selecionar'] = sJson;   
+                                        window.location.href = 'index.php?pagina=sistema&rot=1003&acao=102';
+                                        break;
+                                    }else  if(xResultado[0] == 13){ // retorno de click em selecionar codigo repetido
+                                            alert("Esse produto já foi adicionado!");
+                                            break;
+                                    }
                                     
                                     if(xResultado[0] == 8){
                                         /* Usuário logado no sistema */
@@ -107,7 +138,11 @@
                                                 var nomeTelaManutencao = telaManutencao.attr("id"); 
 
                                                 var nomeTelaConsulta = nomeTelaManutencao.slice(16);
-
+                                                if(xResultado[2] == 3){
+                                                    localStorage['recarregarPagina'] = '1';
+                                                    window.location.href = 'index.php?pagina=sistema';
+                                                    break;
+                                                }
                                                 $(".tela_manutencao").remove();
                                                 var sJson = '{"tela_consulta":"'+nomeTelaConsulta+'"}';
                                                 var oJson = JSON.parse(sJson);
@@ -119,6 +154,9 @@
                                             if(xResultado[0] != 6 && xResultado[0] != 7){
                                                 if($(".tela_manutencao").length){
                                                     $(".tela_manutencao").remove();
+                                                }
+                                                if(xResultado[0] == 666){
+                                                    xResultado.splice(0, 1);
                                                 }
                                                 console.log("rotina atual: "+xResultado[0]);
                                                 gRotina = xResultado[0];
@@ -138,11 +176,14 @@
                                                     gRotinaAtual = 2002;
                                                 }else if(gRotina == 'Permissao'){
                                                     gRotinaAtual = 3000;
+                                                }else if(gRotina == 'Log'){
+                                                    gRotinaAtual = 3001;
                                                 }
 
                                                 // Se for retorno de exclusão entra aqui
                                                 if(xResultado[0] == 3){
                                                     console.log('entrou no retorno exclusão');
+                                                    
                                                     var sJson = '{"tela_consulta":"'+xResultado[1]+'"}';
                                                     var oJson = JSON.parse(sJson);
 
@@ -161,17 +202,10 @@
                                                     break;
                                                 }
 
-                                                if(xResultado[0] == 5){ // retorno de click em selecionar
-                                                    xResultado.splice(0, 1); 
-                                                    var oJson = xResultado;
-
-                                                    var sJson = JSON.stringify(oJson);
-                                                    localStorage['selecionar'] = sJson;   
-                                                    window.location.href = 'index.php?pagina=sistema&rot=1003&acao=102';
-                                                    break;
-                                                }
+                                                
                                             }else{
                                                 if(xResultado[0] != 7){
+                                                   
                                                     console.log('opa');
                                                     xResultado.splice(0, 1); 
                                                     var oJson = xResultado;
@@ -179,7 +213,7 @@
                                                     var sJson = JSON.stringify(oJson);
                                                     localStorage['selecionar'] = sJson;   
                                                     //window.location.href = 'index.php?pagina=sistema&rot=1003&acao=102';
-                                                break;
+                                                    break;
                                                 }else{
                                                     localStorage.removeItem('selecionar');
                                                     break;
@@ -325,24 +359,21 @@
                                                                 oLinhaAux.appendChild(oColuna3);
                                                                 oLinhaAux.appendChild(oColuna4);
 
-
                                                                 oTabela.appendChild(oLinhaAux);
                                                                 oColuna.appendChild(oTabela);
                                                                 oLinha.appendChild(oColuna);
-                                                            }else{
-                                                                
+                                                            }else{         
                                                                 var oColuna = document.createElement("td");
                                                                 oColuna.setAttribute("id", "codigo");
                                                                 oColuna.textContent = aModel[sIndice];
-                                                                oLinha.appendChild(oColuna);
-                                                                
+                                                                oLinha.appendChild(oColuna);     
                                                             }
-                                                            console.log(aModel[sIndice]);
-                                                            
+                                                            console.log(aModel[sIndice]); 
                                                         }
                                                         oTabelaSistema.append(oLinha);
                                                     } 
                                                 }
+                                                
                                             }
                                             break;
                                         }
@@ -355,6 +386,42 @@
                     });
                     
                 }
+                
+                $(".btnSair").click(function(){
+                    window.location.href = '';
+                });
+                
+                $("#btnLogUsuario").click(function(){
+                    $("#btnVisualizar").removeClass("disabled");
+                    $("#btnIncluir").addClass("disabled");
+                    $("#btnAlterar").addClass("disabled");
+                    $("#btnExcluir").removeClass("disabled");
+                    
+                    gRotinaAtual = 3002;
+                    gRotina = 'LogUsuario';
+                    var sJson = '{"tela_consulta":"LogUsuario"}';
+                    var oJson = JSON.parse(sJson);
+                     
+                    /* 2 - Ação Carregar Dados da consulta */
+                    chamaAjax(2, oJson);
+                    $(".titulo_consulta").text('Logs Usuário');
+                });
+                
+                $("#btnLog").click(function(){
+                    $("#btnVisualizar").removeClass("disabled");
+                    $("#btnIncluir").addClass("disabled");
+                    $("#btnAlterar").addClass("disabled");
+                    $("#btnExcluir").removeClass("disabled");
+                    
+                    gRotinaAtual = 3001;
+                    gRotina = 'Log';
+                    var sJson = '{"tela_consulta":"Log"}';
+                    var oJson = JSON.parse(sJson);
+                     
+                    /* 2 - Ação Carregar Dados da consulta */
+                    chamaAjax(2, oJson);
+                    $(".titulo_consulta").text('Logs');
+                });
                 
                 $("#btnPermissao").click(function(){  
                     $("#btnVisualizar").removeClass("disabled");
@@ -497,7 +564,7 @@
                 
                 $("#btnExcluir").click(function(){   
                     if(!$("#btnExcluir").hasClass("disabled")){
-                        var sJson = '{"tela_consulta":"'+gRotina+'","codigo": "'+gLinhaSelecionada+'"}';
+                        var sJson = '{"tela_consulta":"'+gRotina+'","codigo": "'+gLinhaSelecionada+'","acao":"excluir"}';
                         var oJson = JSON.parse(sJson);
 
                         /* 3 - Ação Excluir Usuário */
@@ -525,7 +592,7 @@
                             if(gRotina == "Permissao"){
                                 sGambi = "Usuario.codigo";
                             }
-                            var sJson = '{"'+sGambi+'": "'+gLinhaSelecionada+'","tela_consulta": "'+gRotina+'"}';
+                            var sJson = '{"'+sGambi+'": "'+gLinhaSelecionada+'","tela_consulta": "'+gRotina+'","acao":"visualizar"}';
                             var oJson = JSON.parse(sJson);
                             
                             chamaAjax(5, oJson);
@@ -557,6 +624,18 @@
 
                         chamaAjax(7, oJson);
                     }
+                });
+                
+                $("#btnManutencaoZerar").click(function(){
+                    var iCodigo = $("#codigo").val();
+                    gRotinaAtual = 1000;
+                    gRotina = 'Usuario';
+                    var sJson = '{"tela_consulta":"Usuario", "codigoUsuario":'+iCodigo+'}';
+                    var oJson = JSON.parse(sJson);
+                    
+                    /* 2 - Ação Carregar Dados da consulta */
+                    chamaAjax(2, oJson);
+                    $(".titulo_consulta").text('Usuários');
                 });
                 
                 $("#btnManutencaoConfirmar").click(function(){
@@ -645,7 +724,7 @@
                             var nomeAtributo  = $(this).attr("nomeColuna");
                             var valorAtributo = $(this).val();
                             sJson += '"'+nomeAtributo+'"'+':'+'"'+valorAtributo+'"';
-                             
+                            
                         });
                         /* Gambia */
                         
@@ -653,31 +732,33 @@
                             var nomeAtributo  = $(this).attr("id");
                             var valorAtributo = $(this).val();
                             sJson += ',"'+nomeAtributo+'"'+':'+'"'+valorAtributo+'"';
+                            
                         });
                         sJson += '},';
                         
                         var aProduto = new Array();
-                        $('.div_grid_manutencao input').each(function(){
+                        $('.div_grid_manutencao_interno input').each(function(){
                             var nomeAtributo  = $(this).attr("id");
                             var valorAtributo = $(this).val();
-                            if(nomeAtributo == 'Produto.codigo'){
-                                sJson += '{'; 
-                            }
-                            sJson += '"'+nomeAtributo+'"'+':'+'"'+valorAtributo+'"';
-                            if(nomeAtributo == 'ItemVenda.preco'){
-                                sJson += '}';
-                                aProduto.push(sJson);
-                                sJson = '';
-                            }else{
-                                sJson += ', ';
+                            if(nomeAtributo != 'ItemVenda.precoTotal'){
+                                if(nomeAtributo == 'Produto.codigo'){
+                                    sJson += '{'; 
+                                }
+                                sJson += '"'+nomeAtributo+'"'+':'+'"'+valorAtributo+'"';
+                                if(nomeAtributo == 'ItemVenda.quantidade'){
+                                    sJson += '}';
+                                    aProduto.push(sJson);
+                                    sJson = '';
+                                }else{
+                                    sJson += ', ';
+                                }
                             }
                         });
                         
                         sJson = '['+aProduto.toString()+']';
                         localStorage.removeItem('selecionar');
+                        
                     }
-                    
-                    
     
                     console.log(sJson);
                     var oJson = JSON.parse(sJson);
@@ -718,57 +799,105 @@
                 
                 $(document).on('click', '#btnMenos', function(){
                     var oThis = $(this);
-                    var iCodigo = oThis.parent().children('.codigo').val();
-                    var sJson = '{"codigo":"'+iCodigo+'"}';
-                    var oJson = JSON.parse(sJson);
-
-                    chamaAjax(8, oJson);
                     
-                    oThis.parent().children().remove();
+                    var contador = 0;
+                    $('.div_grid_manutencao_interno .precoTotal').each(function(){
+                        contador = contador + 1;
+                    });
+                    
+                    
+                    if(contador > 1){
+                        var iCodigo = oThis.parent().children('.codigo').val();
+                        var sJson = '{"codigo":"'+iCodigo+'"}';
+                        var oJson = JSON.parse(sJson);
+
+                        chamaAjax(8, oJson);
+
+                        oThis.parent().children().remove();
+                    }
+                    
+                    var valorTotalAux = 0;
+                    $('.div_grid_manutencao_interno .precoTotal').each(function(){
+                        valorTotalAux = valorTotalAux + parseFloat($(this).val());
+                    });
+
+                    $(".total").val(valorTotalAux);
                 });
                 
                 $(document).on('keyup', '.quantidade', function(){
        
                     var oThis = $(this);
-
                     var iQuantidade = $(this).val();
-                    var fPreco      = oThis.parent().children('.preco').val();
+                    
+                    if(iQuantidade <= 0){
+                        $(this).val(1);
+                        iQuantidade = $(this).val();
+                    }else{
+                        var fPreco      = oThis.parent().children('.preco').val();
+                        var valorTotal = iQuantidade * fPreco;
 
-                    var valorTotal = iQuantidade * fPreco;
-                    console.log('valorTotal: '+valorTotal);
+                        var valorTotal = iQuantidade * fPreco;
+                    
+                        oThis.parent().children('.precoTotal').val(valorTotal);
+
+                        var valorTotalAux = 0;
+                        $('.div_grid_manutencao_interno .precoTotal').each(function(){
+                            valorTotalAux = valorTotalAux + parseFloat($(this).val());
+                        });
+
+                        $(".total").val(valorTotalAux);
+                    }
                 });
 
                 $('.quantidade').click(function(){
 
                     var oThis = $(this);
-
                     var iQuantidade = $(this).val();
+
+                    if(iQuantidade <= 0){
+                        $(this).val(1);
+                        iQuantidade = $(this).val();
+                    }
+                     
                     var fPreco      = oThis.parent().children('.preco').val();
+                    
+                    
 
                     var valorTotal = iQuantidade * fPreco;
-                    console.log('valorTotal: '+valorTotal);
+                    
+                    oThis.parent().children('.precoTotal').val(valorTotal);
+                    
+                    var valorTotalAux = 0;
+                    $('.div_grid_manutencao_interno .precoTotal').each(function(){
+                        valorTotalAux = valorTotalAux + parseFloat($(this).val());
+                    });
+                    
+                    $(".total").val(valorTotalAux);
+                    
                 });
             });
             
             /* Mais uma linha do Grid - Produtos */
             $(document).on('click', '#btnMais', function(){
             
-                var oGrid      = $(".div_grid_manutencao");
+                var oGrid      = $(".div_grid_manutencao_interno");
                 var oLinhaGrid = $("<div />").attr('class','div_linha_grid');
 
-                var oInputCodigo    = $('<input  type=text     id=Produto.codigo       class="input_manutencao codigo" disabled />');
-                var oButtonLupa     = $('<button type=button   id=btnLupa              class="btnManutencao" />').html('<span class="glyphicon glyphicon-search"></span>').css('margin', '0 2px 1px 2px');
-                var oInputDescricao = $('<input  type=text     id=Produto.descricao    class="input_manutencao" disabled />');
-                var oInputQtde      = $('<input  type=number   id=ItemVenda.quantidade class="input_manutencao quantidade" />');
-                var oInputPreco     = $('<input  type=text   id=ItemVenda.preco        class="input_manutencao preco" disabled />');
-                var oButtonMenos    = $('<button type="button" id="btnMenos"           class="btnManutencao" />').html('<span class="glyphicon glyphicon-minus"></span>').css('margin', '0 0 1px 2px');
-                var oButtonMais     = $('<button type="button" id="btnMais"            class="btnManutencao" />').html('<span class="glyphicon glyphicon-plus"></span>').css('margin', '0 2px 1px 2px');
+                var oInputCodigo     = $('<input  type=text     id=Produto.codigo       class="input_manutencao codigo" disabled />');
+                var oButtonLupa      = $('<button type=button   id=btnLupa              class="btnManutencao" />').html('<span class="glyphicon glyphicon-search"></span>').css('margin', '0 2px 1px 2px');
+                var oInputDescricao  = $('<input  type=text     id=Produto.descricao    class="input_manutencao" disabled />');
+                var oInputQtde       = $('<input  type=number   id=ItemVenda.quantidade class="input_manutencao quantidade" />');
+                var oInputPreco      = $('<input  type=text     id=ItemVenda.preco      class="input_manutencao preco" disabled />');
+                var oInputPrecoTotal = $('<input  type=text     id=ItemVenda.precoTotal class="input_manutencao precoTotal" disabled />'); 
+                var oButtonMenos     = $('<button type="button" id="btnMenos"           class="btnManutencao" />').html('<span class="glyphicon glyphicon-minus"></span>').css('margin', '0 0 1px 2px');
+                var oButtonMais      = $('<button type="button" id="btnMais"            class="btnManutencao" />').html('<span class="glyphicon glyphicon-plus"></span>').css('margin', '0 2px 1px 2px');
 
                 oLinhaGrid.append(oInputCodigo);
                 oLinhaGrid.append(oButtonLupa);
                 oLinhaGrid.append(oInputDescricao);
-                oLinhaGrid.append(oInputQtde);
                 oLinhaGrid.append(oInputPreco);
+                oLinhaGrid.append(oInputQtde);
+                oLinhaGrid.append(oInputPrecoTotal);
                 oLinhaGrid.append(oButtonMenos);
                 oLinhaGrid.append(oButtonMais);
 
@@ -813,7 +942,7 @@
                 <div class="cover-container paginaInicial">
                     <div class="mastfoot">
                         <div class="inner">
-                            <p>Template desenvolvido por <a href="http://getbootstrap.com">Cleber José Schmidt</a>.</p>
+                            <p>Template desenvolvido por <a href="http://getbootstrap.com">Cleber - Tiago</a>.</p>
                         </div>
                     </div>
 
@@ -822,5 +951,6 @@
             </div>
 
         </div>
+        
     </body>
 </html>

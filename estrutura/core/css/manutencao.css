@@ -50,6 +50,11 @@ label{
     display: none;
 }
 
+.precoTotal{
+    width: 80px;
+    text-align: right;
+}
+
 .codigo, .quantidade{
     width: 50px;
     text-align: right;
@@ -79,4 +84,8 @@ label{
 #valorPgto{
     margin-top: 10px;
     width: 125px;
+}
+
+.text-area{
+    height: 100px;
 }

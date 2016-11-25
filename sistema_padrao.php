@@ -13,14 +13,10 @@
             </div>
             <div id="navbar" class="navbar-collapse collapse">
                 <ul class="nav navbar-nav navbar-right">
-                    <li><a href="#">Dashboard</a></li>
-                    <li><a href="#">Settings</a></li>
-                    <li><a href="#">Profile</a></li>
-                    <li><a href="#">Help</a></li>
+                    <li><a><?php echo $_SESSION['nomeUsuario']; ?></a></li>
+                    <li><a class="btnSair">Sair</a></li>
                 </ul>
-                <form class="navbar-form navbar-right">
-                    <input type="text" class="form-control" placeholder="Procurar...">
-                </form>
+                
             </div>
         </div>
     </nav>
@@ -30,9 +26,12 @@
             <div class="col-sm-3 col-md-2 sidebar">
                 <ul class="nav nav-sidebar menu_lateral_esquerdo">
                     <?php 
-                    echo '<li id="btnPermissao"><a href="#">Permissão</a></li>';
+                    
                     
                     if($_SESSION['tabelaUsuario'] != "2,2,2,2" && $_SESSION['nivelUsuario'] == 1){
+                        echo '<li id="btnLog"><a href="#">Log Padrão</a></li>';
+                        echo '<li id="btnLogUsuario"><a href="#">Log Usuário</a></li>';
+                        echo '<li id="btnPermissao"><a href="#">Permissão</a></li>';
                         echo '<li id="btnUsuario"><a href="#">Usuários<span class="sr-only">(current)</span></a></li>';
                     }
                     if($_SESSION['tabelaProduto'] != "2,2,2,2"){

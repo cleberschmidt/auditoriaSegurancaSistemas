@@ -235,3 +235,15 @@ footer.page-footer {
 }
 
 .menu{}
+
+.linha_titulo{
+    width: 100px !important;
+    height: 50px !important;
+    background: red !important;
+}
+
+.label_codigo{
+    color: red;
+    float: left;
+    margin-left: 0px;
+}

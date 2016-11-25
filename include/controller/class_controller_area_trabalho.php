@@ -15,6 +15,7 @@ class ControllerAreaTrabalho{
     const ROTINA_PRODUTO = 1001;
     
     static public $bCarregaConsulta;
+    static public $sAcao;
             
     function __construct() {   
         $this->processaDados();
@@ -26,6 +27,9 @@ class ControllerAreaTrabalho{
     
     private function parametrosAjax(){
         self::$bCarregaConsulta = false;
+        
+        
+        
         if(isset($_POST['iProcesso'])){
             $iProcesso = $_POST['iProcesso'];
             
@@ -50,7 +54,6 @@ class ControllerAreaTrabalho{
                         }else{
                             echo json_encode(3); 
                         }
-                
                     }
                     break;
                 case PersistenciaAreaTrabalho::ACAO_CARREGAR_DADOS: // Carrega todos os dados da consulta
@@ -63,8 +66,20 @@ class ControllerAreaTrabalho{
                     
                     $oController = new $sController();
                     self::$bCarregaConsulta = true;
+                    
+                    if(isset($aJson['codigoUsuario'])){
+                        $oController->zerarTentativaLogin($aJson['codigoUsuario']);
+                    }
+                    
+                    
                     $aModel = $oController->getAllFromModel();
-                    $aModel = $this->addIdentificadorProcesso($aModel, $sNomeTelaConsulta);
+                    
+                    if(!is_null($aModel)){
+                        $aModel = $this->addIdentificadorProcesso($aModel, $sNomeTelaConsulta);
+                    }else{
+                        $aModel = Array(0 => 666, $sNomeTelaConsulta);
+                    }
+
                     
                     if(isset($aJson['lupa'])){
                         $aModel = $this->addIdentificadorProcesso($aModel, 'lupa');
@@ -75,6 +90,11 @@ class ControllerAreaTrabalho{
                 case PersistenciaAreaTrabalho::ACAO_EXCLUIR_REGISTRO: // Exclui um registro
                     $sNomeTelaConsulta = $aJson['tela_consulta'];
                     array_shift($aJson);
+                    
+                    if(isset($aJson['acao'])){
+                        self::$sAcao = $aJson['acao'];
+                        unset($aJson['acao']);
+                    }
                     
                     $sPersistencia = 'Persistencia'.ucfirst($sNomeTelaConsulta);
                     $sController = 'Controller'.ucfirst($sNomeTelaConsulta);
@@ -88,14 +108,18 @@ class ControllerAreaTrabalho{
                     }
                     break;
                 case 4: // Ação incluir e Alterar
-                
+                    
+                    if(isset($aJson['password'])){
+                        $aJson['password'] = md5($aJson['password']);
+                    }
+                    
                     
                     if(!isset($aJson['nomeTelaManutencao'])){ //Então é venda
                         /* Exclusivo para Venda */
                         $oControllerPadraoEstrutura = new ControllerPadraoEstrutura();
                         $oControllerPadraoEstrutura->insereDadosVenda($aJson);
                         session_start();
-                        unset($_SESSION);
+                        unset($_SESSION['oProdutoGrid']);
                         echo json_encode(Array(0 => 1, 1 => 2)); 
                         
                         
@@ -113,7 +137,20 @@ class ControllerAreaTrabalho{
                             
                             $oControllerPadraoEstrutura = new ControllerPadraoEstrutura();
                             if($oControllerPadraoEstrutura->alteraDados($aJson)){
-                                echo json_encode(Array(0 => 1, 1 => 2)); 
+                                
+                                session_start();
+                                $oControllerPermissao = new ControllerPermissao();
+                                $aPermissao = $oControllerPermissao->buscaPermissao();
+
+                                $_SESSION['tabelaUsuario'] = $aPermissao[0]['per_tabela_usuario'];
+                                $_SESSION['tabelaProduto'] = $aPermissao[0]['per_tabela_produto'];
+                                $_SESSION['tabelaCliente'] = $aPermissao[0]['per_tabela_cliente'];
+                                $_SESSION['tabelaVenda']   = $aPermissao[0]['per_tabela_venda'];
+                                $_SESSION['tabelaEstado']  = $aPermissao[0]['per_tabela_estado'];
+                                $_SESSION['tabelaCidade']  = $aPermissao[0]['per_tabela_cidade'];
+                                $_SESSION['tabelaCep']     = $aPermissao[0]['per_tabela_cep'];
+                                
+                                echo json_encode(Array(0 => 1, 1 => 2, 2 => 3)); 
                             }
                 
                         }else{
@@ -133,14 +170,16 @@ class ControllerAreaTrabalho{
 
                             $aJson = $this->verificaData($aJson);
 
+                            
                             if($iAcao == 103){
+                                self::$sAcao = 'alterar';
                                 if($oControllerPadraoEstrutura->alteraDados($aJson)){
 
                                     echo json_encode(Array(0 => 1, 1 => 2)); 
                                 }
                             }else{
 
-
+                                self::$sAcao = 'inserir';
                                 /* Default */
                                  if($oControllerPadraoEstrutura->insereDados($aJson)){
 
@@ -151,9 +190,15 @@ class ControllerAreaTrabalho{
                     }
                     break;
                 case 5: // Ação alterar //Retorna somente um model
+                    
                     $aJson = $_POST['oJson'];
 
                     $sNomeTelaConsulta = $aJson['tela_consulta'];
+                                        
+                    if(isset($aJson['acao'])){
+                        self::$sAcao = $aJson['acao'];
+                        unset($aJson['acao']);
+                    }
                     
                     $aJsonAux = Array();
                     foreach($aJson as $sIndice => $sValor){
@@ -203,7 +248,7 @@ class ControllerAreaTrabalho{
                     break;
                 case 7:
                     $aJson = $_POST['oJson'];
-                    
+                    $bJaTem = false;
                     $oPersistenciaProduto = new PersistenciaProduto();
                     $oPersistenciaProduto->setRelacionamento();
                     
@@ -217,14 +262,29 @@ class ControllerAreaTrabalho{
                         foreach($aProdutoGrid as $aProduto){
                             $aAux[] = $aProduto;
                         }
-                        array_push($aAux, $aModel[0]);
-                        $_SESSION['oProdutoGrid'] = $aAux;
+                        
+                        
+                        foreach ($aAux as $aSession){
+                            if($aSession['codigo'] == $aModel[0]['codigo']){
+                                $bJaTem = true;
+                            }
+                        }
+                        if(!$bJaTem){
+                            array_push($aAux, $aModel[0]);
+                            $_SESSION['oProdutoGrid'] = $aAux;
+                        }
                     }else{
                         $_SESSION['oProdutoGrid'] = $aModel;
                     }
+                    
                     $aModel = $_SESSION['oProdutoGrid'];
-
-                    $aModel = $this->addIdentificadorProcesso($aModel, 5);
+                    
+                    if($bJaTem){
+                        $aModel = $this->addIdentificadorProcesso($aModel, 13); //Já foi adicionado
+                    }else{
+                        $aModel = $this->addIdentificadorProcesso($aModel, 5);
+                    }
+                    
                     
                     echo json_encode($aModel);
                     break;
@@ -246,19 +306,7 @@ class ControllerAreaTrabalho{
                     $aAux = $this->addIdentificadorProcesso($aAux, $t);
                     echo json_encode($aAux);
                     break;
-                /*case 9: // Validar permissoes
-                    session_start();
-                    $retorno;
-                    if(isset($_SESSION['codigoUsuario'])){
-                        $oControllerPermissao = new ControllerPermissao();
-                        
-                        $retorno = $this->addIdentificadorProcesso($oControllerPermissao->buscaPermissao(), 8);
-                    }else{
-                        $retorno = 5;
-                    }
-                    echo json_encode($retorno);
-                    break;*/
-                //default:
+                
             }
         }
     }

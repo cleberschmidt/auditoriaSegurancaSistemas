@@ -8,7 +8,7 @@
         <input type="password" id="inputPassword" class="form-control" placeholder="Senha" required>
         <div class="checkbox">
             <label>
-                <input type="checkbox" value="remember-me"> Lembrar-me
+                <!--<input type="checkbox" value="remember-me"> Lembrar-me-->
             </label>
         </div>
         <button class="btn btn-lg btn-primary btn-block" type="button" id="btnLogarSistema">Fazer Login</button>

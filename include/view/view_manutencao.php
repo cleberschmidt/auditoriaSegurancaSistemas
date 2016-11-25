@@ -15,6 +15,10 @@
         require 'class_view_manutencao_venda.php';
     }else if($_GET['rot'] == 3000){ // Rotina Venda
         require 'class_view_manutencao_permissao.php';
+    }else if($_GET['rot'] == 3001){ // Rotina Log
+        require 'class_view_manutencao_log.php';
+    }else if($_GET['rot'] == 3002){ // Rotina Log Usuário
+        require 'class_view_manutencao_log_usuario.php';
     }
     
 
@@ -55,6 +59,14 @@
                 break;
             case "3000":
                 var permissoesAcesso = "1,2,1,2";
+                validarPermissoes(permissoesAcesso);
+                break;
+            case "3001":
+                var permissoesAcesso = "1,2,2,1";
+                validarPermissoes(permissoesAcesso);
+                break;
+            case "3002":
+                var permissoesAcesso = "1,2,2,1";
                 validarPermissoes(permissoesAcesso);
                 break;
         }
@@ -103,6 +115,17 @@
         if(iAcao == 105){
             if(getRotinaUrl() != "3000"){
                 $('.tela_manutencao input').each(function(){
+                    var nomeAtributo  = $(this).attr("id");
+                    for(var propriedade in oCampoTelaManutencao){
+                        if(propriedade == nomeAtributo){
+                            $(this).val(oCampoTelaManutencao[propriedade]);
+                            $(this).attr('disabled','disabled');
+                            break;
+                        }
+                    }
+                });
+                
+                 $('.tela_manutencao textarea').each(function(){
                     var nomeAtributo  = $(this).attr("id");
                     for(var propriedade in oCampoTelaManutencao){
                         if(propriedade == nomeAtributo){
